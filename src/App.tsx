@@ -1,25 +1,41 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { createGlobalStyle } from 'styled-components';
+import { ThemeProvider } from './contexts/ThemeContext';
+import Header from './components/Header';
+import About from './components/About';
+import Skills from './components/Skills';
+import Pipelines from './components/Pipelines';
+import Projects from './components/Projects';
+import Contact from './components/Contact';
+
+const GlobalStyle = createGlobalStyle`
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Arial', sans-serif;
+    background-color: ${({ theme }) => theme.background};
+    color: ${({ theme }) => theme.text};
+    line-height: 1.6;
+  }
+`;
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ThemeProvider>
+      <GlobalStyle />
+      <Header />
+      <main>
+        <About />
+        <Skills />
+        <Pipelines />
+        <Projects />
+        <Contact />
+      </main>
+    </ThemeProvider>
   );
 }
 
