@@ -1,46 +1,82 @@
-# Getting Started with Create React App
+# Rumbler Soppa Portfolio 🚀
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+> Um portfólio moderno e responsivo construído com React e TypeScript, destacando minha experiência como especialista DevOps.
 
-## Available Scripts
+[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Styled Components](https://img.shields.io/badge/styled--components-DB7093?style=for-the-badge&logo=styled-components&logoColor=white)](https://styled-components.com/)
+[![Jest](https://img.shields.io/badge/Jest-C21325?style=for-the-badge&logo=jest&logoColor=white)](https://jestjs.io/)
 
-In the project directory, you can run:
+## 🌟 Destaques
 
-### `npm start`
+- 🎨 Design moderno e responsivo
+- 🌓 Suporte a tema claro/escuro
+- 🧩 Arquitetura baseada em componentes
+- 📱 Otimizado para dispositivos móveis
+- 🧪 Cobertura completa de testes
+- 📦 TypeScript para segurança de tipos
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## 🚀 Início Rápido
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+1. **Clone o repositório**
+   ```bash
+   git clone https://github.com/seu-usuario/rumbler-portfolio.git
+   cd rumbler-portfolio
+   ```
 
-### `npm test`
+2. **Instale as dependências**
+   ```bash
+   npm install
+   ```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+3. **Inicie o servidor de desenvolvimento**
+   ```bash
+   npm start
+   ```
 
-### `npm run build`
+4. **Abra no navegador**
+   ```
+   http://localhost:3000
+   ```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## 📚 Scripts Disponíveis
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- `npm start` - Inicia o servidor de desenvolvimento
+- `npm test` - Executa os testes
+- `npm run build` - Cria a versão de produção
+- `npm run lint` - Verifica problemas de linting
+- `npm run format` - Formata o código com Prettier
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 🏗️ Estrutura do Projeto
 
-### `npm run eject`
+```bash
+rumbler-portfolio/
+├── docs/              # Documentação detalhada
+├── public/            # Arquivos estáticos
+├── src/
+│   ├── components/    # Componentes React
+│   ├── styles/       # Temas e estilos globais
+│   ├── types/        # Definições TypeScript
+│   └── utils/        # Funções utilitárias
+└── tests/            # Testes
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+## 📖 Documentação
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Para documentação detalhada sobre componentes, temas e guias de contribuição, consulte a [pasta docs](./docs).
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+## 🤝 Contribuindo
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+1. Fork o projeto
+2. Crie sua branch (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add: nova funcionalidade'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
 
-## Learn More
+## 📄 Licença
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+---
+
+⭐️ Feito com ❤️ por [Rumbler Soppa](https://github.com/rumbler)
