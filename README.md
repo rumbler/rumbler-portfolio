@@ -1,74 +1,74 @@
 # Rumbler Soppa Portfolio 🚀
 
-> Um portfólio moderno e responsivo construído com React e TypeScript, destacando minha experiência como especialista DevOps.
+> A modern and responsive portfolio built with React and TypeScript, showcasing my expertise as a DevOps specialist.
 
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Styled Components](https://img.shields.io/badge/styled--components-DB7093?style=for-the-badge&logo=styled-components&logoColor=white)](https://styled-components.com/)
 [![Jest](https://img.shields.io/badge/Jest-C21325?style=for-the-badge&logo=jest&logoColor=white)](https://jestjs.io/)
 
-## 🌟 Destaques
+## 🌟 Highlights
 
-- 🎨 Design moderno e responsivo
-- 🌓 Suporte a tema claro/escuro
-- 🧩 Arquitetura baseada em componentes
-- 📱 Otimizado para dispositivos móveis
-- 🧪 Cobertura completa de testes
-- 📦 TypeScript para segurança de tipos
+- 🎨 Modern and responsive design
+- 🌓 Light/Dark theme support
+- 🧩 Component-based architecture
+- 📱 Mobile-optimized
+- 🧪 Comprehensive test coverage
+- 📦 TypeScript for type safety
 
-## 🚀 Início Rápido
+## 🚀 Quick Start
 
-1. **Clone o repositório**
+1. **Clone the repository**
    ```bash
    git clone https://github.com/rumbler/rumbler-portfolio.git
    cd rumbler-portfolio
    ```
 
-2. **Instale as dependências**
+2. **Install dependencies**
    ```bash
    npm install
    ```
 
-3. **Inicie o servidor de desenvolvimento**
+3. **Start development server**
    ```bash
    npm start
    ```
 
-4. **Abra no navegador**
+4. **Open in browser**
    ```
    http://localhost:3000
    ```
 
-## 📚 Scripts Disponíveis
+## 📚 Available Scripts
 
-- `npm start` - Inicia o servidor de desenvolvimento
-- `npm test` - Executa os testes
-- `npm run build` - Cria a versão de produção
-- `npm run lint` - Verifica problemas de linting
-- `npm run format` - Formata o código com Prettier
+- `npm start` - Starts development server
+- `npm test` - Runs tests
+- `npm run build` - Creates production build
+- `npm run lint` - Checks for linting issues
+- `npm run format` - Formats code with Prettier
 
-## 🏗️ Estrutura do Projeto
+## 🏗️ Project Structure
 
 ```bash
 rumbler-portfolio/
-├── docs/              # Documentação detalhada
-├── public/            # Arquivos estáticos
+├── docs/              # Detailed documentation
+├── public/            # Static files
 ├── src/
-│   ├── components/    # Componentes React
-│   ├── styles/       # Temas e estilos globais
-│   ├── types/        # Definições TypeScript
-│   └── utils/        # Funções utilitárias
-└── tests/            # Testes
+│   ├── components/    # React components
+│   ├── styles/       # Themes and global styles
+│   ├── types/        # TypeScript definitions
+│   └── utils/        # Utility functions
+└── tests/            # Tests
 ```
 
-## 📖 Documentação
+## 📖 Documentation
 
-Para documentação detalhada sobre componentes, temas e guias de contribuição, consulte a [pasta docs](./docs).
+For detailed documentation about components, themes, and more, check out the [docs folder](./docs).
 
-## 📄 Licença
+## 📄 License
 
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+This project is under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ---
 
-⭐️ Feito com ❤️ por [Rumbler Soppa](https://github.com/rumbler)
+⭐️ Made with ❤️ by [Rumbler Soppa](https://github.com/rumbler)
