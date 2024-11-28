@@ -29,10 +29,10 @@ function App() {
       <GlobalStyle />
       <Header />
       <main>
-        <About />
-        <Skills />
         <Pipelines />
+        <Skills />
         <Projects />
+        <About />
         <Contact />
       </main>
     </ThemeProvider>

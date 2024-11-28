@@ -10,10 +10,10 @@ const Header: React.FC = () => {
     <HeaderContainer>
       <Logo>Rumbler Soppa</Logo>
       <NavMenu>
-        <NavItem href="#about">About</NavItem>
-        <NavItem href="#skills">Skills</NavItem>
         <NavItem href="#pipelines">Pipelines</NavItem>
+        <NavItem href="#skills">Skills</NavItem>
         <NavItem href="#projects">Projects</NavItem>
+        <NavItem href="#about">About</NavItem>
         <NavItem href="#contact">Contact</NavItem>
         <ThemeToggle onClick={toggleTheme}>
           {isDarkMode ? <FaSun /> : <FaMoon />}
