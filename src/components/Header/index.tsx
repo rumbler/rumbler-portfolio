@@ -11,8 +11,8 @@ const Header: React.FC = () => {
       <Logo>Rumbler Soppa</Logo>
       <NavMenu>
         <NavItem href="#pipelines">Pipelines</NavItem>
-        <NavItem href="#about">About</NavItem>
         <NavItem href="#skills">Skills</NavItem>
+        <NavItem href="#about">About</NavItem>
         <NavItem href="#projects">Projects</NavItem>
         <NavItem href="#contact">Contact</NavItem>
         <ThemeToggle onClick={toggleTheme}>

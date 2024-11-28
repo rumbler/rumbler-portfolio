@@ -30,8 +30,8 @@ function App() {
       <Header />
       <main>
         <Pipelines />
-        <About />
         <Skills />
+        <About />
         <Projects />
         <Contact />
       </main>
