@@ -57,12 +57,12 @@
 rumbler-portfolio/
 ├── docs/              # Detailed documentation
 ├── public/            # Static files
-├── src/
-│   ├── components/    # React components
-│   ├── styles/       # Themes and global styles
-│   ├── types/        # TypeScript definitions
-│   └── utils/        # Utility functions
-└── tests/            # Tests
+└── src/
+    ├── components/    # React components
+    │   └── __tests__ # Component tests
+    ├── styles/       # Themes and global styles
+    ├── types/        # TypeScript definitions
+    └── utils/        # Utility functions
 ```
 
 ## 📖 Documentation
