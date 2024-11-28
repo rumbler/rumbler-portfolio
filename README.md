@@ -1,5 +1,7 @@
 # Rumbler Soppa Portfolio 🚀
 
+[![Continuous Integration](https://github.com/rumbler/rumbler-portfolio/actions/workflows/ci.yml/badge.svg)](https://github.com/rumbler/rumbler-portfolio/actions/workflows/ci.yml)
+
 > A modern and responsive portfolio built with React and TypeScript, showcasing my expertise as a DevOps specialist.
 
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
