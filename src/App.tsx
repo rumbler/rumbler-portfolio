@@ -29,9 +29,9 @@ function App() {
       <GlobalStyle />
       <Header />
       <main>
+        <Pipelines />
         <About />
         <Skills />
-        <Pipelines />
         <Projects />
         <Contact />
       </main>
