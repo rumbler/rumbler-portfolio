@@ -19,23 +19,27 @@
 ## 🚀 Quick Start
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/rumbler/rumbler-portfolio.git
    cd rumbler-portfolio
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Start development server**
+
    ```bash
    npm start
    ```
 
 4. **Open in browser**
-   ```
+
+   ```bash
    http://localhost:3000
    ```
 
