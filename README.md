@@ -20,7 +20,7 @@
 
 1. **Clone o repositório**
    ```bash
-   git clone https://github.com/seu-usuario/rumbler-portfolio.git
+   git clone https://github.com/rumbler/rumbler-portfolio.git
    cd rumbler-portfolio
    ```
 
@@ -64,14 +64,6 @@ rumbler-portfolio/
 ## 📖 Documentação
 
 Para documentação detalhada sobre componentes, temas e guias de contribuição, consulte a [pasta docs](./docs).
-
-## 🤝 Contribuindo
-
-1. Fork o projeto
-2. Crie sua branch (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add: nova funcionalidade'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
 
 ## 📄 Licença
 
