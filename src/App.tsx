@@ -31,8 +31,8 @@ function App() {
       <main>
         <Pipelines />
         <Skills />
-        <About />
         <Projects />
+        <About />
         <Contact />
       </main>
     </ThemeProvider>

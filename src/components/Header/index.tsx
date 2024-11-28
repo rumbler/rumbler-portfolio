@@ -12,8 +12,8 @@ const Header: React.FC = () => {
       <NavMenu>
         <NavItem href="#pipelines">Pipelines</NavItem>
         <NavItem href="#skills">Skills</NavItem>
-        <NavItem href="#about">About</NavItem>
         <NavItem href="#projects">Projects</NavItem>
+        <NavItem href="#about">About</NavItem>
         <NavItem href="#contact">Contact</NavItem>
         <ThemeToggle onClick={toggleTheme}>
           {isDarkMode ? <FaSun /> : <FaMoon />}
