@@ -7,16 +7,16 @@
 [![Styled Components](https://img.shields.io/badge/styled--components-DB7093?style=for-the-badge&logo=styled-components&logoColor=white)](https://styled-components.com/)
 [![Jest](https://img.shields.io/badge/Jest-C21325?style=for-the-badge&logo=jest&logoColor=white)](https://jestjs.io/)
 
-## 🌟 Highlights
+## Highlights
 
-- 🎨 Modern and responsive design
-- 🌓 Light/Dark theme support
-- 🧩 Component-based architecture
-- 📱 Mobile-optimized
-- 🧪 Comprehensive test coverage
-- 📦 TypeScript for type safety
+- Modern and responsive design
+- Light/Dark theme support
+- Component-based architecture
+- Mobile-optimized
+- Comprehensive test coverage
+- TypeScript for type safety
 
-## 🚀 Quick Start
+## Quick Start
 
 1. **Clone the repository**
 
@@ -43,15 +43,15 @@
    http://localhost:3000
    ```
 
-## 📚 Available Scripts
+## Available Scripts
 
-- `npm start` - Starts development server
-- `npm test` - Runs tests
-- `npm run build` - Creates production build
-- `npm run lint` - Checks for linting issues
-- `npm run format` - Formats code with Prettier
+- `npm start`        - Starts development server
+- `npm test`         - Runs tests
+- `npm run build`    - Creates production build
+- `npm run lint`     - Checks for linting issues
+- `npm run format`   - Formats code with Prettier
 
-## 🏗️ Project Structure
+## Project Structure
 
 ```bash
 rumbler-portfolio/
@@ -59,17 +59,17 @@ rumbler-portfolio/
 ├── public/            # Static files
 └── src/
     ├── components/    # React components
-    │   └── __tests__ # Component tests
-    ├── styles/       # Themes and global styles
-    ├── types/        # TypeScript definitions
-    └── utils/        # Utility functions
+    │   └── __tests__  # Component tests
+    ├── styles/        # Themes and global styles
+    ├── types/         # TypeScript definitions
+    └── utils/         # Utility functions
 ```
 
-## 📖 Documentation
+## Documentation
 
 For detailed documentation about components, themes, and more, check out the [docs folder](./docs).
 
-## 📄 License
+## License
 
 This project is under the MIT License. See the [LICENSE](LICENSE) file for details.
 
