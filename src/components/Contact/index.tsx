@@ -1,23 +1,27 @@
 import React from 'react';
-import { ContactContainer, SocialLinks, SocialLink } from './styles';
+import { ContactSection, ContactTitle, ContactText, ContactButton } from './styles';
 import { FaLinkedin, FaGithub, FaEnvelope } from 'react-icons/fa';
 
 const Contact: React.FC = () => {
   return (
-    <ContactContainer id="contact">
-      <h2>Contact</h2>
-      <SocialLinks>
-        <SocialLink href="https://www.linkedin.com/in/rumbler-soppa" target="_blank" rel="noopener noreferrer">
+    <ContactSection id="contact">
+      <ContactTitle>Contact</ContactTitle>
+      <ContactText>
+        I'm always open to new opportunities and collaborations.
+        Feel free to reach out if you'd like to work together!
+      </ContactText>
+      <div>
+        <ContactButton href="https://www.linkedin.com/in/rumbler-soppa" target="_blank" rel="noopener noreferrer">
           <FaLinkedin /> LinkedIn
-        </SocialLink>
-        <SocialLink href="https://github.com/rumblersoppa" target="_blank" rel="noopener noreferrer">
+        </ContactButton>
+        <ContactButton href="https://github.com/rumblersoppa" target="_blank" rel="noopener noreferrer">
           <FaGithub /> GitHub
-        </SocialLink>
-        <SocialLink href="mailto:rumbler.soppa@email.com">
+        </ContactButton>
+        <ContactButton href="mailto:rumbler.soppa@email.com">
           <FaEnvelope /> Email
-        </SocialLink>
-      </SocialLinks>
-    </ContactContainer>
+        </ContactButton>
+      </div>
+    </ContactSection>
   );
 };
 
