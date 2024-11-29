@@ -27,7 +27,13 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "version:patch": "bash scripts/version-bump.sh patch",
+    "version:minor": "bash scripts/version-bump.sh minor",
+    "version:major": "bash scripts/version-bump.sh major",
+    "version:patch:dry": "bash scripts/version-bump.sh patch --dry-run",
+    "version:minor:dry": "bash scripts/version-bump.sh minor --dry-run",
+    "version:major:dry": "bash scripts/version-bump.sh major --dry-run"
   },
   "eslintConfig": {
     "extends": [
