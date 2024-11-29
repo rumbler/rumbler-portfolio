@@ -1,42 +1,63 @@
 import React from 'react';
-import { 
-  SkillsContainer, 
-  SkillsGrid, 
-  SkillCard, 
-  SkillIcon, 
-  SkillTitle 
+import {
+  SkillsSection,
+  SkillsTitle,
+  SkillsGrid,
+  SkillCard,
+  SkillIcon,
+  SkillTitle,
+  SkillDescription
 } from './styles';
-import { 
-  FaDocker, 
-  FaAws, 
-  FaLinux, 
-  FaCloud, 
-  FaCode, 
-  FaServer 
-} from 'react-icons/fa';
+import { FaAws, FaDocker, FaJenkins, FaGithub } from 'react-icons/fa';
+import { SiKubernetes, SiTerraform } from 'react-icons/si';
 
 const Skills: React.FC = () => {
   const skills = [
-    { icon: FaDocker, title: 'Docker' },
-    { icon: FaAws, title: 'AWS' },
-    { icon: FaLinux, title: 'Linux' },
-    { icon: FaCloud, title: 'Kubernetes' },
-    { icon: FaCode, title: 'CI/CD' },
-    { icon: FaServer, title: 'Infrastructure as Code' }
+    {
+      icon: <FaAws />,
+      title: 'AWS',
+      description: 'Cloud infrastructure and services'
+    },
+    {
+      icon: <FaDocker />,
+      title: 'Docker',
+      description: 'Containerization and orchestration'
+    },
+    {
+      icon: <SiKubernetes />,
+      title: 'Kubernetes',
+      description: 'Container orchestration'
+    },
+    {
+      icon: <SiTerraform />,
+      title: 'Terraform',
+      description: 'Infrastructure as Code'
+    },
+    {
+      icon: <FaJenkins />,
+      title: 'Jenkins',
+      description: 'CI/CD pipelines'
+    },
+    {
+      icon: <FaGithub />,
+      title: 'GitHub Actions',
+      description: 'Automated workflows'
+    }
   ];
 
   return (
-    <SkillsContainer id="skills">
-      <h2>My Skills</h2>
+    <SkillsSection id="skills">
+      <SkillsTitle>Skills</SkillsTitle>
       <SkillsGrid>
         {skills.map((skill, index) => (
           <SkillCard key={index}>
-            <SkillIcon as={skill.icon} />
+            <SkillIcon as="div">{skill.icon}</SkillIcon>
             <SkillTitle>{skill.title}</SkillTitle>
+            <SkillDescription>{skill.description}</SkillDescription>
           </SkillCard>
         ))}
       </SkillsGrid>
-    </SkillsContainer>
+    </SkillsSection>
   );
 };
 
