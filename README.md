@@ -100,7 +100,14 @@ The project includes both light and dark themes, with:
 
 For detailed documentation about components, themes, and more, check out the [docs folder](./docs):
 
+- [Style Guide](./docs/STYLE_GUIDE.md)
+- [Git Workflow](./docs/GIT_WORKFLOW.md)
+- [Testing Guide](./docs/TESTING.md)
 - [Typography System](./docs/TYPOGRAPHY.md)
+- [Components](./docs/components/)
+  - [Button](./docs/components/BUTTON.md)
+  - [Typography](./docs/components/TYPOGRAPHY.md)
+  - [Theme](./docs/components/THEME.md)
 
 ## License
 
