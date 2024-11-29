@@ -1,76 +1,62 @@
 import styled from 'styled-components';
 
-export const ProjectsContainer = styled.section`
-  background-color: ${({ theme }) => theme.secondaryBackground};
-  color: ${({ theme }) => theme.text};
-  padding: 4rem;
+export const ProjectsTitle = styled.h2`
+  ${({ theme }) => theme.headlineLarge}
   text-align: center;
-
-  h2 {
-    margin-bottom: 2rem;
-    color: ${({ theme }) => theme.primary};
-  }
+  margin-bottom: 2rem;
 `;
 
-export const ProjectGrid = styled.div`
+export const ProjectsSection = styled.section`
+  padding: 2rem;
+  background-color: ${({ theme }) => theme.secondaryBackground};
+`;
+
+export const ProjectsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 2rem;
-
-  @media (max-width: 1024px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
+  max-width: 1200px;
+  margin: 0 auto;
 `;
 
 export const ProjectCard = styled.div`
   background-color: ${({ theme }) => theme.cardBackground};
-  border-radius: 10px;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease;
-  border: 1px solid ${({ theme }) => theme.border};
 
   &:hover {
-    transform: scale(1.05);
+    transform: translateY(-5px);
   }
 `;
 
 export const ProjectImage = styled.img`
   width: 100%;
-  height: 250px;
+  height: 200px;
   object-fit: cover;
 `;
 
-export const ProjectInfo = styled.div`
+export const ProjectContent = styled.div`
   padding: 1.5rem;
-  text-align: left;
+`;
 
-  h3 {
-    color: ${({ theme }) => theme.primary};
-    margin-bottom: 1rem;
-  }
+export const ProjectTitle = styled.h3`
+  ${({ theme }) => theme.titleLarge}
+  margin-bottom: 0.5rem;
+`;
 
-  p {
-    margin-bottom: 1rem;
-    color: ${({ theme }) => theme.textSecondary};
-  }
+export const ProjectDescription = styled.p`
+  ${({ theme }) => theme.bodyLarge}
+  margin-bottom: 1rem;
+`;
 
-  div {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-
-    span {
-      background-color: ${({ theme }) => theme.background};
-      color: ${({ theme }) => theme.primary};
-      padding: 0.3rem 0.7rem;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      border: 1px solid ${({ theme }) => theme.primary};
-    }
+export const ProjectLink = styled.a`
+  ${({ theme }) => theme.labelLarge}
+  display: inline-block;
+  color: ${({ theme }) => theme.primary};
+  text-decoration: none;
+  
+  &:hover {
+    text-decoration: underline;
   }
 `;

@@ -69,3 +69,18 @@ export const TextContent = styled.div`
     }
   }
 `;
+
+export const AboutSection = styled.section`
+  padding: 2rem;
+  background-color: ${({ theme }) => theme.secondaryBackground};
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+
+  p {
+    ${({ theme }) => theme.bodyLarge}
+    max-width: 800px;
+  }
+`;

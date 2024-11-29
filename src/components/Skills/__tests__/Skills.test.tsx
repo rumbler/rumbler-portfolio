@@ -3,33 +3,36 @@ import Skills from '../index';
 
 // Mock react-icons/fa
 jest.mock('react-icons/fa', () => ({
-  FaDocker: () => <svg data-testid="icon-docker" />,
   FaAws: () => <svg data-testid="icon-aws" />,
-  FaLinux: () => <svg data-testid="icon-linux" />,
-  FaCloud: () => <svg data-testid="icon-cloud" />,
-  FaCode: () => <svg data-testid="icon-code" />,
-  FaServer: () => <svg data-testid="icon-server" />
+  FaDocker: () => <svg data-testid="icon-docker" />,
+  FaJenkins: () => <svg data-testid="icon-jenkins" />,
+  FaGithub: () => <svg data-testid="icon-github" />
+}));
+
+// Mock react-icons/si
+jest.mock('react-icons/si', () => ({
+  SiKubernetes: () => <svg data-testid="icon-kubernetes" />,
+  SiTerraform: () => <svg data-testid="icon-terraform" />
 }));
 
 // Mock styled-components
 jest.mock('styled-components', () => {
   const styled = {
-    section: (strings: TemplateStringsArray, ...args: any[]) => 
-      ({ children, ...props }: any) => <section {...props}>{children}</section>,
-    div: (strings: TemplateStringsArray, ...args: any[]) => 
-      ({ children, as: Component = 'div', ...props }: any) => {
-        if (Component === 'div') {
-          return <div {...props}>{children}</div>;
-        }
-        return <Component data-testid={`icon-${props.icon}`} {...props}>{children}</Component>;
-      },
-    article: (strings: TemplateStringsArray, ...args: any[]) => 
-      ({ children, ...props }: any) => <article {...props}>{children}</article>,
-    h2: (strings: TemplateStringsArray, ...args: any[]) => 
-      ({ children, ...props }: any) => <h2 {...props}>{children}</h2>,
-    h3: (strings: TemplateStringsArray, ...args: any[]) => 
-      ({ children, ...props }: any) => <h3 {...props}>{children}</h3>
+    section: () => ({ children, ...props }: any) => <section {...props}>{children}</section>,
+    div: () => ({ children, ...props }: any) => <div {...props}>{children}</div>,
+    article: () => ({ children, ...props }: any) => <article {...props}>{children}</article>,
+    h2: () => ({ children, ...props }: any) => <h2 {...props}>{children}</h2>,
+    h3: () => ({ children, ...props }: any) => <h3 {...props}>{children}</h3>,
+    p: () => ({ children, ...props }: any) => <p {...props}>{children}</p>
   };
+
+  styled.section.attrs = () => styled.section;
+  styled.div.attrs = () => styled.div;
+  styled.article.attrs = () => styled.article;
+  styled.h2.attrs = () => styled.h2;
+  styled.h3.attrs = () => styled.h3;
+  styled.p.attrs = () => styled.p;
+
   return {
     __esModule: true,
     default: styled,
@@ -42,9 +45,9 @@ describe('Skills Component', () => {
     return render(<Skills />);
   };
 
-  it('should render the "My Skills" heading', () => {
+  it('should render the "Skills" heading', () => {
     renderSkills();
-    const heading = screen.getByText('My Skills');
+    const heading = screen.getByText('Skills');
     expect(heading).toBeInTheDocument();
     expect(heading.tagName).toBe('H2');
   });
@@ -52,12 +55,12 @@ describe('Skills Component', () => {
   it('should render all skill cards with correct titles', () => {
     renderSkills();
     const expectedSkills = [
-      'Docker',
       'AWS',
-      'Linux',
+      'Docker',
       'Kubernetes',
-      'CI/CD',
-      'Infrastructure as Code'
+      'Terraform',
+      'Jenkins',
+      'GitHub Actions'
     ];
 
     expectedSkills.forEach(skillTitle => {
@@ -80,7 +83,7 @@ describe('Skills Component', () => {
 
   it('should render the correct number of skill cards', () => {
     renderSkills();
-    const skillCards = screen.getAllByText(/^(Docker|AWS|Linux|Kubernetes|CI\/CD|Infrastructure as Code)$/);
+    const skillCards = screen.getAllByText(/^(AWS|Docker|Kubernetes|Terraform|Jenkins|GitHub Actions)$/);
     expect(skillCards).toHaveLength(6);
   });
 });

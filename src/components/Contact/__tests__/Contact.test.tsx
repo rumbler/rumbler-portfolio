@@ -15,6 +15,10 @@ jest.mock('styled-components', () => {
       ({ children, ...props }: any) => <section {...props}>{children}</section>,
     div: (strings: TemplateStringsArray, ...args: any[]) => 
       ({ children, ...props }: any) => <div {...props}>{children}</div>,
+    h2: (strings: TemplateStringsArray, ...args: any[]) => 
+      ({ children, ...props }: any) => <h2 {...props}>{children}</h2>,
+    p: (strings: TemplateStringsArray, ...args: any[]) => 
+      ({ children, ...props }: any) => <p {...props}>{children}</p>,
     a: (strings: TemplateStringsArray, ...args: any[]) => 
       ({ children, href, target, rel, ...props }: any) => (
         <a href={href} target={target} rel={rel} {...props}>{children}</a>

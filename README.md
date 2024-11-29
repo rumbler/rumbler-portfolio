@@ -12,6 +12,7 @@
 ## Highlights
 
 - Modern and responsive design
+- Material Design 3 typography system
 - Light/Dark theme support
 - Component-based architecture
 - Mobile-optimized
@@ -58,18 +59,48 @@
 ```bash
 rumbler-portfolio/
 ├── docs/              # Detailed documentation
+│   └── TYPOGRAPHY.md  # Typography system documentation
 ├── public/            # Static files
 └── src/
     ├── components/    # React components
     │   └── __tests__  # Component tests
     ├── styles/        # Themes and global styles
+    │   ├── typography.ts    # Typography definitions
+    │   ├── themes.ts       # Theme configurations
+    │   └── globalStyles.ts # Global style definitions
     ├── types/         # TypeScript definitions
     └── utils/         # Utility functions
 ```
 
+## Design System
+
+The project follows Material Design 3 guidelines for a consistent and modern user experience:
+
+### Typography
+
+The typography system has been updated to use Material Design 3's type scale. This provides:
+
+- Consistent text hierarchy
+- Improved readability
+- Responsive scaling
+- Semantic HTML mapping
+
+For detailed information about the typography system, check out the [Typography Documentation](./docs/TYPOGRAPHY.md).
+
+### Themes
+
+The project includes both light and dark themes, with:
+
+- Consistent color palette
+- Accessible contrast ratios
+- Smooth theme transitions
+- Material Design color tokens
+
 ## Documentation
 
-For detailed documentation about components, themes, and more, check out the [docs folder](./docs).
+For detailed documentation about components, themes, and more, check out the [docs folder](./docs):
+
+- [Typography System](./docs/TYPOGRAPHY.md)
 
 ## License
 
