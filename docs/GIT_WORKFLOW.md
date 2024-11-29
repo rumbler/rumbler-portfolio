@@ -107,6 +107,88 @@ We follow Semantic Versioning (MAJOR.MINOR.PATCH):
 - MINOR (0.4.0 -> 0.5.0): backwards-compatible features
 - PATCH (0.4.0 -> 0.4.1): backwards-compatible bug fixes
 
+## 🔢 Version Management
+
+### Version Bump Process
+
+We use semantic versioning (MAJOR.MINOR.PATCH) and manage versions through an automated process using pnpm scripts.
+
+#### Prerequisites
+- Ensure you have `pnpm` installed
+- Have `git` configured
+- All changes must be merged to `main` first
+- CI/CD pipeline must be passing
+
+#### Running Version Bump
+
+Use one of the following pnpm commands based on the type of change:
+
+```bash
+# For bug fixes and small improvements (0.4.2 -> 0.4.3)
+pnpm version:patch
+
+# For new features (0.4.2 -> 0.5.0)
+pnpm version:minor
+
+# For breaking changes (0.4.2 -> 1.0.0)
+pnpm version:major
+```
+
+#### Testing Version Bump (Dry Run)
+
+To simulate a version bump without making any changes, use the dry-run commands:
+
+```bash
+# Simulate patch version bump
+pnpm version:patch:dry
+
+# Simulate minor version bump
+pnpm version:minor:dry
+
+# Simulate major version bump
+pnpm version:major:dry
+```
+
+The dry run will:
+- Show all proposed changes
+- Calculate the new version
+- Display the CHANGELOG entry
+- List all git operations
+- Not make any actual changes
+
+#### When to Use Each Version Type
+
+- **PATCH** (0.0.x): 
+  - Bug fixes
+  - Small improvements
+  - Documentation updates
+  - No breaking changes
+
+- **MINOR** (0.x.0):
+  - New features
+  - Substantial improvements
+  - Deprecation notices
+  - No breaking changes
+
+- **MAJOR** (x.0.0):
+  - Breaking changes
+  - Major redesigns
+  - Incompatible API changes
+
+#### Version Bump Best Practices
+
+- Always run version bumps from `main` branch (script handles this automatically)
+- Ensure all changes are properly documented
+- Review generated CHANGELOG entries
+- Verify CI/CD pipeline after version bump
+- Use meaningful commit messages following conventional commits:
+  - `feat:` for new features
+  - `fix:` for bug fixes
+  - `docs:` for documentation
+  - `chore:` for maintenance
+
+> 💡 Tip: The automated script helps maintain consistency, but always review the generated changes before confirming.
+
 ## 🏷️ Version Control
 
 1. Merge `development` to `main`:
@@ -121,8 +203,7 @@ git merge development --no-ff
 1. Version bump and tag:
 
 ```bash
-pnpm version [major|minor|patch]
-git push --follow-tags
+pnpm version:patch
 ```
 
 ## 🎯 Branch Naming
