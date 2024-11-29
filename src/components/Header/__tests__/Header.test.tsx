@@ -1,7 +1,9 @@
-import { render, screen } from '@testing-library/react';
+import React from 'react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { ThemeProvider } from 'styled-components';
+import { lightTheme } from '../../../styles/themes';
 import Header from '../index';
-import { ThemeProvider } from '../../../contexts/ThemeContext';
 
 const mockToggleTheme = jest.fn();
 
@@ -11,49 +13,73 @@ jest.mock('../../../contexts/ThemeContext', () => ({
     isDarkMode: false,
     toggleTheme: mockToggleTheme,
   }),
-  ThemeProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
+
+const renderHeader = () => {
+  return render(
+    <ThemeProvider theme={lightTheme}>
+      <Header />
+    </ThemeProvider>
+  );
+};
 
 describe('Header Component', () => {
   beforeEach(() => {
+    window.innerWidth = 1024;
     mockToggleTheme.mockClear();
   });
 
-  const renderHeader = () => {
-    return render(
-      <ThemeProvider>
-        <Header />
-      </ThemeProvider>
-    );
-  };
-
-  it('should render the logo text', async () => {
+  it('renders logo and navigation items', () => {
     renderHeader();
-    expect(await screen.findByText('Rumbler Soppa')).toBeInTheDocument();
-  });
-
-  it('should render all navigation links', async () => {
-    renderHeader();
-    const navItems = ['About', 'Skills', 'Pipelines', 'Projects', 'Contact'];
     
-    for (const item of navItems) {
-      const link = await screen.findByText(item);
-      expect(link).toBeInTheDocument();
-      expect(link).toHaveAttribute('href', `#${item.toLowerCase()}`);
-    }
+    expect(screen.getByText('Rumbler Soppa')).toBeInTheDocument();
+    expect(screen.getByText('Pipelines')).toBeInTheDocument();
+    expect(screen.getByText('Developer')).toBeInTheDocument();
+    expect(screen.getByText('Skills')).toBeInTheDocument();
+    expect(screen.getByText('Projects')).toBeInTheDocument();
+    expect(screen.getByText('About')).toBeInTheDocument();
+    expect(screen.getByText('Contacts')).toBeInTheDocument();
   });
 
-  it('should render theme toggle button', async () => {
+  it('toggles theme when theme button is clicked', () => {
     renderHeader();
-    const themeToggle = await screen.findByRole('button');
-    expect(themeToggle).toBeInTheDocument();
-  });
-
-  it('should call toggleTheme when theme button is clicked', async () => {
-    const user = userEvent.setup();
-    renderHeader();
-    const themeToggle = await screen.findByRole('button');
-    await user.click(themeToggle);
+    
+    const themeButton = screen.getByRole('button', { name: /switch to dark theme/i });
+    fireEvent.click(themeButton);
+    
     expect(mockToggleTheme).toHaveBeenCalledTimes(1);
+  });
+
+  describe('Mobile Menu', () => {
+    beforeEach(() => {
+      window.innerWidth = 768;
+    });
+
+    it('shows menu button on mobile', () => {
+      renderHeader();
+      const menuButton = screen.getByRole('button', { name: /open menu/i });
+      expect(menuButton).toBeInTheDocument();
+    });
+
+    it('toggles menu when menu button is clicked', () => {
+      renderHeader();
+      const menuButton = screen.getByRole('button', { name: /open menu/i });
+      
+      fireEvent.click(menuButton);
+      expect(screen.getByText('Pipelines')).toBeVisible();
+      
+      fireEvent.click(menuButton);
+      expect(screen.getByText('Pipelines')).not.toBeVisible();
+    });
+
+    it('closes menu when nav item is clicked', () => {
+      renderHeader();
+      const menuButton = screen.getByRole('button', { name: /open menu/i });
+      
+      fireEvent.click(menuButton);
+      fireEvent.click(screen.getByText('Pipelines'));
+      
+      expect(screen.getByText('Pipelines')).not.toBeVisible();
+    });
   });
 });

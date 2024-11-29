@@ -31,13 +31,13 @@
 2. **Install dependencies**
 
    ```bash
-   npm install
+   pnpm install
    ```
 
 3. **Start development server**
 
    ```bash
-   npm start
+   pnpm start
    ```
 
 4. **Open in browser**
@@ -48,11 +48,11 @@
 
 ## Available Scripts
 
-- `npm start`        - Starts development server
-- `npm test`         - Runs tests
-- `npm run build`    - Creates production build
-- `npm run lint`     - Checks for linting issues
-- `npm run format`   - Formats code with Prettier
+- `pnpm start`        - Starts development server
+- `pnpm test`         - Runs tests
+- `pnpm run build`    - Creates production build
+- `pnpm run lint`     - Checks for linting issues
+- `pnpm run format`   - Formats code with Prettier
 
 ## Project Structure
 
