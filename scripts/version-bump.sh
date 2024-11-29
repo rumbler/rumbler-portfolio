@@ -152,13 +152,10 @@ fi
 
 # Only ask for confirmation in real run
 if [ "$DRY_RUN" = false ]; then
-    echo
-    read -p "Are you sure you want to proceed? [y/N] " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    printf "\nAre you sure you want to proceed? [y/N] "
+    read -r response
+    if [[ ! "$response" =~ ^[Yy]$ ]]; then
         echo "Operation cancelled"
-        # Revert version bump in package.json
-        execute_cmd "git checkout package.json"
         exit 1
     fi
 fi
