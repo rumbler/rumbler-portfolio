@@ -44,30 +44,34 @@ execute_cmd() {
 
 # Function to sync all branches
 sync_all() {
+    if [ "$DRY_RUN" = true ]; then
+        echo "Would synchronize branches..."
+        return
+    fi
     echo "Fetching all changes..."
     execute_cmd "git fetch --all"
-    echo "Pulling changes from main..."
-    execute_cmd "git pull origin main"
-    echo "Pulling changes from development..."
-    execute_cmd "git pull origin development"
 }
 
 # Check current branch and switch to main if needed
 CURRENT_BRANCH=$(git branch --show-current)
 if [ "$CURRENT_BRANCH" != "main" ]; then
-    echo "Not on main branch. Currently on: $CURRENT_BRANCH"
-    echo "Stashing changes and switching to main..."
-    execute_cmd "git stash -u"
-    execute_cmd "git checkout main"
-    echo "Successfully switched to main branch"
+    if [ "$DRY_RUN" = true ]; then
+        echo "Not on main branch. Currently on: $CURRENT_BRANCH"
+        echo "Would switch to main branch and stash changes"
+    else
+        echo "Not on main branch. Currently on: $CURRENT_BRANCH"
+        echo "Stashing changes and switching to main..."
+        execute_cmd "git stash -u"
+        execute_cmd "git checkout main"
+        echo "Successfully switched to main branch"
+    fi
 fi
 
 # Sync everything before starting
-echo "Synchronizing branches before starting..."
 sync_all
 
 # Check for uncommitted changes
-if [ -n "$(git status --porcelain)" ]; then
+if [ -n "$(git status --porcelain)" ] && [ "$DRY_RUN" = false ]; then
     echo "Error: Working directory is not clean. Commit or stash changes first."
     exit 1
 fi
