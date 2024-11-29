@@ -3,8 +3,8 @@
 # Exit on error
 set -e
 
-# Check if help is requested
-if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+# Check if help is requested (before any git operations)
+if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$2" = "--help" ] || [ "$2" = "-h" ]; then
     echo "Usage: $0 [patch|minor|major] [--dry-run]"
     echo "Options:"
     echo "  --dry-run    Simulate the version bump without making changes"
