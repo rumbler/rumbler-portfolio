@@ -1,3 +1,22 @@
+## [0.5.0] - 2024-11-29
+
+### Added
+- feat: update header navigation
+
+### Fixed
+- fix: simplify branch synchronization in version bump script
+- fix: simplify version bump confirmation prompt
+- fix: improve version bump script confirmation prompt
+- fix: improve version bump script dry-run and help handling
+
+### Documentation
+- docs: add style guide and components documentation
+- docs: update package manager references from npm to pnpm
+
+### Other Changes
+- chore: add version bump automation script
+- chore: sync development with main after version bump
+
 # Changelog
 
 ## [0.4.3] - 2024-XX-XX
