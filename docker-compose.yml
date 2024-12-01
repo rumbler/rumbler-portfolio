@@ -3,22 +3,23 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: rumbler-portfolio
+      args:
+        - NODE_ENV=${NODE_ENV:-production}
+    container_name: rumbler-portfolio-${NODE_ENV:-production}
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "${PORT:-3000}:3000"
     deploy:
       resources:
         limits:
-          cpus: '0.5'
-          memory: 128M
+          cpus: '${DOCKER_CPU_LIMIT:-1}'
+          memory: ${DOCKER_MEMORY_LIMIT:-512M}
         reservations:
-          cpus: '0.25'
-          memory: 64M
+          cpus: '${DOCKER_CPU_RESERVE:-0.5}'
+          memory: ${DOCKER_MEMORY_RESERVE:-256M}
     networks:
       - portfolio-net
 
 networks:
   portfolio-net:
-    name: portfolio-net
     driver: bridge
