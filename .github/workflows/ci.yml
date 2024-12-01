@@ -54,14 +54,6 @@ jobs:
 
     - name: Upload to Nexus
       run: |
-        curl -v -u ${{ secrets.NEXUS_USERNAME }}:${{ secrets.NEXUS_PASSWORD }} \
-          -X PUT \
-          --fail \
-          --data-binary @build.zip \
-          "https://pkg.rumblersoppa.com.br/repository/raw-hosted/rumbler-portfolio/${GITHUB_SHA}/build.zip"
-
-    - name: Upload build artifact (GitHub)
-      uses: actions/upload-artifact@v4
-      with:
-        name: build
-        path: build/
+        curl -f -u "${{ secrets.NEXUS_USERNAME }}:${{ secrets.NEXUS_PASSWORD }}" \
+          --upload-file build.zip \
+          "https://pkg.rumblersoppa.com.br/repository/raw-hosted/rumbler-portfolio/${{ github.sha }}/build.zip"
