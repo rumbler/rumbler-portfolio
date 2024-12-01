@@ -1,0 +1,16 @@
+# Cascade Assistant Notes
+
+## Commit Messages
+- Always write commit messages in English
+- Follow the format:
+  ```
+  type: short description
+
+  - Detailed change 1
+  - Detailed change 2
+  - Detailed change 3
+  ```
+
+## Documentation
+- Keep docs/GIT_WORKFLOW.md updated with any workflow changes
+- Document all significant changes in English

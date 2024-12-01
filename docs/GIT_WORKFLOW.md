@@ -227,8 +227,10 @@ pnpm version:patch
 3. Create small, focused pull requests
 4. Review code before merging
 5. Delete branches after merging
-6. Write clear, descriptive commit messages
-7. Squash commits when appropriate
+6. Always write commit messages in English
+7. Use the correct commit type prefix
+8. Write meaningful commit messages
+9. Update documentation when needed
 
 ## 📝 Initial Setup
 
