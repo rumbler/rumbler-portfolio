@@ -1,35 +1,37 @@
 name: Development Deployment
 
 on:
-  push:
+  workflow_run:
+    workflows: ["Continuous Integration"]
+    types:
+      - completed
     branches:
-      - develop
-  pull_request:
-    branches:
-      - develop
-      - main
+      - development
 
 jobs:
   deploy-development:
     runs-on: self-hosted
+    if: github.event.workflow_run.conclusion == 'success'
     steps:
       - uses: actions/checkout@v3
       
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: Download build artifact
+        uses: actions/download-artifact@v3
         with:
-          node-version: 20.10.0
-          
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
+          name: build
+          path: dist/
+      
+      - name: Get commit hash
+        id: commit
+        run: echo "hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
       
       - name: Build Development Image
         run: |
           docker build \
             --build-arg NODE_ENV=development \
-            -t portfolio:dev .
+            -t portfolio:dev \
+            -t portfolio:${{ steps.commit.outputs.hash }} \
+            .
       
       - name: Deploy to Development
         run: |
@@ -42,10 +44,7 @@ jobs:
           PORT=3001 \
           docker-compose up -d
           
-          # Adiciona comentário na PR com a URL de preview (se for uma PR)
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            echo "Deployment available at: https://dev.rumblersoppa.com.br"
-          fi
+          echo "Deployed version: ${{ steps.commit.outputs.hash }}"
           
       - name: Clean old images
         run: docker image prune -f --filter "until=24h"

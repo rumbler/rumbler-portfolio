@@ -2,9 +2,9 @@ name: Continuous Integration
 
 on:
   push:
-    branches: [ "main", "feat/*" ]
+    branches: [ "main", "development", "feat/*", "fix/*" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "development" ]
 
 jobs:
   build-and-test:
@@ -16,7 +16,7 @@ jobs:
     - name: Install Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: 18
+        node-version: 20.10.0
 
     - uses: pnpm/action-setup@v2
       name: Install pnpm
@@ -45,3 +45,9 @@ jobs:
 
     - name: Build project
       run: pnpm build
+
+    - name: Upload build artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: build
+        path: dist/
