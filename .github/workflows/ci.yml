@@ -55,7 +55,7 @@ jobs:
     - name: Upload to Nexus
       run: |
         curl -v -u ${{ secrets.NEXUS_USERNAME }}:${{ secrets.NEXUS_PASSWORD }} \
-          -X POST \
+          -X PUT \
           --fail \
           --data-binary @build.zip \
           "https://pkg.rumblersoppa.com.br/repository/raw-hosted/rumbler-portfolio/${GITHUB_SHA}/build.zip"
