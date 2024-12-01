@@ -1,0 +1,47 @@
+name: Production Deployment
+
+on:
+  push:
+    tags:
+      - 'v*'  # Apenas tags que começam com v (v1.0.0, v2.1.0, etc)
+
+jobs:
+  deploy-production:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Get tag version
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.10.0
+          
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          
+      - name: Build Production Image
+        run: |
+          docker build \
+            --build-arg NODE_ENV=production \
+            -t portfolio:${{ steps.get_version.outputs.VERSION }} \
+            -t portfolio:latest .
+      
+      - name: Deploy to Production
+        run: |
+          docker-compose down
+          NODE_ENV=production \
+          DOCKER_CPU_LIMIT=1 \
+          DOCKER_MEMORY_LIMIT=512M \
+          DOCKER_CPU_RESERVE=0.5 \
+          DOCKER_MEMORY_RESERVE=256M \
+          PORT=3000 \
+          docker-compose up -d
+          
+      - name: Clean old images
+        run: docker image prune -f --filter "until=24h"

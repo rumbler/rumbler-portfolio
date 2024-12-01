@@ -1,0 +1,51 @@
+name: Development Deployment
+
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
+      - main
+
+jobs:
+  deploy-development:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.10.0
+          
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      
+      - name: Build Development Image
+        run: |
+          docker build \
+            --build-arg NODE_ENV=development \
+            -t portfolio:dev .
+      
+      - name: Deploy to Development
+        run: |
+          docker-compose down
+          NODE_ENV=development \
+          DOCKER_CPU_LIMIT=0.5 \
+          DOCKER_MEMORY_LIMIT=128M \
+          DOCKER_CPU_RESERVE=0.25 \
+          DOCKER_MEMORY_RESERVE=64M \
+          PORT=3001 \
+          docker-compose up -d
+          
+          # Adiciona comentário na PR com a URL de preview (se for uma PR)
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "Deployment available at: https://dev.rumblersoppa.com.br"
+          fi
+          
+      - name: Clean old images
+        run: docker image prune -f --filter "until=24h"
