@@ -11,10 +11,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Install Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: 20.10.0
 
@@ -29,7 +29,7 @@ jobs:
       run: |
         echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
 
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       name: Setup pnpm cache
       with:
         path: ${{ env.STORE_PATH }}
@@ -46,8 +46,22 @@ jobs:
     - name: Build project
       run: pnpm build
 
-    - name: Upload build artifact
-      uses: actions/upload-artifact@v3
+    - name: Create build archive
+      run: |
+        cd build
+        zip -r ../build.zip .
+        cd ..
+
+    - name: Upload to Nexus
+      run: |
+        curl -v -u ${{ secrets.NEXUS_USERNAME }}:${{ secrets.NEXUS_PASSWORD }} \
+          -X POST \
+          --fail \
+          --data-binary @build.zip \
+          "https://pkg.rumblersoppa.com.br/repository/raw-hosted/rumbler-portfolio/${GITHUB_SHA}/build.zip"
+
+    - name: Upload build artifact (GitHub)
+      uses: actions/upload-artifact@v4
       with:
         name: build
         path: build/

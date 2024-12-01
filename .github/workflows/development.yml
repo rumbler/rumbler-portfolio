@@ -13,28 +13,46 @@ jobs:
     runs-on: self-hosted
     if: github.event.workflow_run.conclusion == 'success'
     steps:
-      - uses: actions/checkout@v3
-      
-      - name: Download build artifact
-        uses: actions/download-artifact@v3
+      - uses: actions/checkout@v4
         with:
-          name: build
-          path: dist/
+          ref: ${{ github.event.workflow_run.head_sha }}
       
       - name: Get commit hash
         id: commit
         run: echo "hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
       
+      - name: Download build from Nexus
+        run: |
+          mkdir -p dist
+          curl -u ${{ secrets.NEXUS_USERNAME }}:${{ secrets.NEXUS_PASSWORD }} \
+            -o build.zip \
+            "https://pkg.rumblersoppa.com.br/repository/raw-hosted/rumbler-portfolio/${{ github.event.workflow_run.head_sha }}/build.zip"
+          unzip build.zip -d dist/
+          rm build.zip
+
+      - name: Login to Nexus Docker Registry
+        uses: docker/login-action@v2
+        with:
+          registry: registry.rumblersoppa.com.br
+          username: ${{ secrets.NEXUS_USERNAME }}
+          password: ${{ secrets.NEXUS_PASSWORD }}
+      
       - name: Build Development Image
         run: |
           docker build \
             --build-arg NODE_ENV=development \
-            -t portfolio:dev \
-            -t portfolio:${{ steps.commit.outputs.hash }} \
+            -t registry.rumblersoppa.com.br/portfolio:dev \
+            -t registry.rumblersoppa.com.br/portfolio:${{ steps.commit.outputs.hash }} \
             .
+      
+      - name: Push Docker Image
+        run: |
+          docker push registry.rumblersoppa.com.br/portfolio:dev
+          docker push registry.rumblersoppa.com.br/portfolio:${{ steps.commit.outputs.hash }}
       
       - name: Deploy to Development
         run: |
+          echo "IMAGE_TAG=${{ steps.commit.outputs.hash }}" > .env
           docker-compose down
           NODE_ENV=development \
           DOCKER_CPU_LIMIT=0.5 \
@@ -47,4 +65,6 @@ jobs:
           echo "Deployed version: ${{ steps.commit.outputs.hash }}"
           
       - name: Clean old images
-        run: docker image prune -f --filter "until=24h"
+        run: |
+          docker image prune -f --filter "until=24h"
+          docker image rm registry.rumblersoppa.com.br/portfolio:${{ steps.commit.outputs.hash }}
