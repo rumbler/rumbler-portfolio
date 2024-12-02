@@ -1,5 +1,11 @@
 name: Development Deployment
 
+# Workflow requires write permissions for packages to push Docker images
+# and read permissions for repository contents
+permissions:
+  packages: write
+  contents: read
+
 on:
   workflow_run:
     workflows: ["Continuous Integration"]
@@ -13,18 +19,6 @@ jobs:
     runs-on: self-hosted
     if: github.event.workflow_run.conclusion == 'success'
     steps:
-      - name: Debug Workflow Context
-        env:
-          GITHUB_CONTEXT: ${{ toJSON(github) }}
-        run: |
-          echo "Event that triggered the workflow: ${{ github.event_name }}"
-          echo "Workflow Run ID: ${{ github.event.workflow_run.id }}"
-          echo "Workflow Run Status: ${{ github.event.workflow_run.status }}"
-          echo "Workflow Run Conclusion: ${{ github.event.workflow_run.conclusion }}"
-          echo "Branch: ${{ github.event.workflow_run.head_branch }}"
-          echo "Full GitHub Context:"
-          echo "$GITHUB_CONTEXT"
-
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
