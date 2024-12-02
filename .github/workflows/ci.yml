@@ -56,9 +56,17 @@ jobs:
       env:
         NEXUS_PASS: ${{ secrets.NEXUS_PASSWORD }}
       run: |
-        echo "Uploading build.zip to Nexus..."
-        echo "File size: $(ls -lh build.zip)"
-        curl -v -f -u "${{ secrets.NEXUS_USERNAME }}:$NEXUS_PASS" \
+        FILE_SIZE=$(stat -f%z build.zip)
+        echo "File size: $FILE_SIZE bytes"
+        curl -v -u ${{ secrets.NEXUS_USERNAME }}:${{ secrets.NEXUS_PASSWORD }} \
           --upload-file build.zip \
           "https://pkg.rumblersoppa.com.br/repository/raw-hosted/rumbler-portfolio/${{ github.sha }}/build.zip"
-        echo "Upload completed successfully"
+        echo "Upload completed successfully!"
+
+  call-development-deploy:
+    needs: build-and-test
+    if: github.ref == 'refs/heads/development' && github.event_name == 'push'
+    uses: ./.github/workflows/development.yml
+    with:
+      commit_sha: ${{ github.sha }}
+    secrets: inherit

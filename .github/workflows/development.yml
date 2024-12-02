@@ -9,21 +9,20 @@ permissions:
   deployments: write  # Para criar deployments
 
 on:
-  workflow_run:
-    workflows: ["Continuous Integration"]
-    types:
-      - completed
-    branches:
-      - development
+  workflow_call:
+    inputs:
+      commit_sha:
+        required: true
+        type: string
+        description: "The commit SHA to deploy"
 
 jobs:
   deploy-development:
     runs-on: self-hosted
-    if: github.event.workflow_run.conclusion == 'success'
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ inputs.commit_sha }}
       
       - name: Get commit hash
         id: commit
@@ -34,7 +33,7 @@ jobs:
           mkdir -p dist
           curl -u ${{ secrets.NEXUS_USERNAME }}:${{ secrets.NEXUS_PASSWORD }} \
             -o build.zip \
-            "https://pkg.rumblersoppa.com.br/repository/raw-hosted/rumbler-portfolio/${{ github.event.workflow_run.head_sha }}/build.zip"
+            "https://pkg.rumblersoppa.com.br/repository/raw-hosted/rumbler-portfolio/${{ inputs.commit_sha }}/build.zip"
           unzip build.zip -d dist/
           rm build.zip
 
