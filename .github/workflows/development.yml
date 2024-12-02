@@ -1,10 +1,12 @@
 name: Development Deployment
 
-# Workflow requires write permissions for packages to push Docker images
-# and read permissions for repository contents
+# Workflow permissions for running after CI and handling Docker
 permissions:
-  packages: write
-  contents: read
+  packages: write      # Para push de imagens Docker
+  contents: read      # Para checkout do código
+  actions: read       # Para ler o workflow anterior (CI)
+  checks: write       # Para atualizar o status do workflow
+  deployments: write  # Para criar deployments
 
 on:
   workflow_run:
