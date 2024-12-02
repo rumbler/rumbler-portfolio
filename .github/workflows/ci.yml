@@ -2,13 +2,17 @@ name: Continuous Integration
 
 on:
   push:
-    branches: [ "main", "development", "feat/*", "fix/*" ]
-  pull_request:
     branches: [ "main", "development" ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ "development" ]
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
 
     steps:
     - uses: actions/checkout@v4
@@ -19,54 +23,54 @@ jobs:
         node-version: 20.10.0
 
     - uses: pnpm/action-setup@v2
-      name: Install pnpm
       with:
         version: 8
-        run_install: false
-
-    - name: Get pnpm store directory
-      shell: bash
-      run: |
-        echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-    - uses: actions/cache@v4
-      name: Setup pnpm cache
-      with:
-        path: ${{ env.STORE_PATH }}
-        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-        restore-keys: |
-          ${{ runner.os }}-pnpm-store-
-
+    
     - name: Install dependencies
       run: pnpm install
 
     - name: Run tests
       run: pnpm test
 
-    - name: Build project
-      run: pnpm build
-
-    - name: Create build archive
+    - name: Build
       run: |
-        cd build
+        pnpm build
+        cd dist
         zip -r ../build.zip .
         cd ..
 
+    - name: Set Version
+      id: version
+      run: |
+        if [[ $GITHUB_REF == refs/tags/* ]]; then
+          # Se for uma tag, usa a própria tag como versão
+          VERSION=${GITHUB_REF#refs/tags/}
+        else
+          # Caso contrário, usa o hash do commit
+          VERSION=$(git rev-parse --short HEAD)
+        fi
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+    # Upload para o Nexus apenas se não for a branch main
     - name: Upload to Nexus
+      if: github.ref != 'refs/heads/main'
       env:
         NEXUS_PASS: ${{ secrets.NEXUS_PASSWORD }}
       run: |
         FILE_SIZE=$(stat -f%z build.zip)
         echo "File size: $FILE_SIZE bytes"
-        curl -v -u ${{ secrets.NEXUS_USERNAME }}:${{ secrets.NEXUS_PASSWORD }} \
+        curl -v -u "${{ secrets.NEXUS_USERNAME }}:$NEXUS_PASS" \
           --upload-file build.zip \
-          "https://pkg.rumblersoppa.com.br/repository/raw-hosted/rumbler-portfolio/${{ github.sha }}/build.zip"
+          "https://pkg.rumblersoppa.com.br/repository/raw-hosted/rumbler-portfolio/${{ steps.version.outputs.version }}/build.zip"
         echo "Upload completed successfully!"
 
+  # Deploy para desenvolvimento apenas se for branch development ou PR para development
   call-development-deploy:
     needs: build-and-test
-    if: github.ref == 'refs/heads/development' && github.event_name == 'push'
+    if: (github.ref == 'refs/heads/development' || github.event_name == 'pull_request') && github.ref != 'refs/heads/main'
     uses: ./.github/workflows/development.yml
     with:
-      commit_sha: ${{ github.sha }}
-    secrets: inherit
+      version: ${{ needs.build-and-test.outputs.version }}
+    secrets:
+      nexus_username: ${{ secrets.NEXUS_USERNAME }}
+      nexus_password: ${{ secrets.NEXUS_PASSWORD }}
