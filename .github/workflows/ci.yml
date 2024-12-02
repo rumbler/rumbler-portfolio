@@ -54,6 +54,9 @@ jobs:
 
     - name: Upload to Nexus
       run: |
-        curl -f -u "${{ secrets.NEXUS_USERNAME }}:${{ secrets.NEXUS_PASSWORD }}" \
+        echo "Uploading build.zip to Nexus..."
+        echo "File size: $(ls -lh build.zip)"
+        curl -v -f -u "${{ secrets.NEXUS_USERNAME }}:${{ secrets.NEXUS_PASSWORD }}" \
           --upload-file build.zip \
           "https://pkg.rumblersoppa.com.br/repository/raw-hosted/rumbler-portfolio/${{ github.sha }}/build.zip"
+        echo "Upload completed successfully"
