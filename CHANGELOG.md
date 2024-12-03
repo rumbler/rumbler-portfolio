@@ -1,3 +1,39 @@
+## [1.0.0] - 2024-12-02
+
+### Added
+- feat: update docker-compose to use Nexus registry
+- feat: update CI/CD pipelines to use Nexus repositories
+- feat: add Docker configuration
+
+### Fixed
+- fix: standardize production workflow
+- fix: use env var for nexus password in development workflow
+- fix: correct stat command and remove verbose flags
+- fix: correct build directory in workflows
+- fix: correct workflow triggers and add debug logs
+- fix: correct CI/CD workflow configuration
+- fix: use env var for nexus password
+- fix: change Nexus upload method to PUT
+
+### Documentation
+- docs: add communication guidelines to cascade notes
+- docs: add english commit messages rule
+
+### Other Changes
+- chore: remove .cascade-notes
+- refactor: remove debug messages from CI workflow
+- refactor: change to use workflow_call for better orchestration
+- chore: add more specific permissions for workflow_run
+- chore: add specific permissions and remove debug logs
+- chore: add debug logs to CD workflow
+- ci: improve nexus upload logging
+- refactor: simplify nexus upload in CI workflow
+- ci: update build artifact path
+- ci: fix build artifact path
+- ci: fix github actions workflow configuration
+- ci: implement GitHub Actions workflows for development and production environments
+- chore: sync development with main after version bump to 0.5.0
+
 ## [0.5.0] - 2024-11-29
 
 ### Added
