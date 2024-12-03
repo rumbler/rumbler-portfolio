@@ -21,9 +21,6 @@ on:
       nexus_password:
         required: true
   workflow_dispatch:  # Permite execução manual
-  push:
-    branches:
-      - development
 
 jobs:
   deploy-development:
@@ -46,7 +43,7 @@ jobs:
       - name: Download build from Nexus
         run: |
           mkdir -p dist
-          curl -u "${{ secrets.nexus_username }}:${{ secrets.nexus_password }}" \
+          curl -v -u "${{ secrets.nexus_username }}:${{ secrets.nexus_password }}" \
             -o build.zip \
             "https://pkg.rumblersoppa.com.br/repository/raw-hosted/rumbler-portfolio/${{ inputs.version }}/build.zip"
           unzip build.zip -d dist/

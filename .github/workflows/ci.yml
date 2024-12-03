@@ -50,6 +50,7 @@ jobs:
           VERSION=$(git rev-parse --short HEAD)
         fi
         echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "Using version: $VERSION"
 
     # Upload para o Nexus apenas se não for a branch main
     - name: Upload to Nexus
