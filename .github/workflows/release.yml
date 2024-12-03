@@ -12,11 +12,11 @@ on:
       - "main"
 
 permissions:
-  packages: write      # Para push de imagens Docker
-  contents: write     # Para checkout do código e criar tags
-  actions: read       # Para ler o workflow anterior
-  checks: write       # Para atualizar o status
-  deployments: write  # Para criar deployments
+  packages: write
+  contents: write
+  actions: read
+  checks: write
+  deployments: write
 
 jobs:
   deploy-release:

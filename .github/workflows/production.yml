@@ -9,14 +9,14 @@ on:
         type: string
   push:
     tags:
-      - 'v*'
+      - 'v[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'
 
 permissions:
-  packages: write      # Para push de imagens Docker
-  contents: read      # Para checkout do código
-  actions: read       # Para ler o workflow anterior
-  checks: write       # Para atualizar o status
-  deployments: write  # Para criar deployments
+  packages: write
+  contents: read
+  actions: read
+  checks: write
+  deployments: write
 
 jobs:
   deploy-production:
@@ -41,24 +41,17 @@ jobs:
           VERSION=${GITHUB_REF#refs/tags/}
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
-      - name: Get RC tag
-        id: rc_tag
-        run: |
-          VERSION=${{ github.event.inputs.version || steps.get_version.outputs.version }}
-          RC_TAG="${VERSION%-*}-rc.$(git rev-parse --short HEAD)"
-          echo "rc_tag=${RC_TAG}" >> $GITHUB_OUTPUT
-      
       - name: Download build from Nexus
         env:
           NEXUS_PASS: ${{ secrets.NEXUS_PASSWORD }}
           NEXUS_URL: ${{ secrets.NEXUS_URL }}
           NEXUS_REPO: ${{ secrets.NEXUS_REPOSITORY }}
-          RC_TAG: ${{ steps.rc_tag.outputs.rc_tag }}
+          VERSION: ${{ github.event.inputs.version || steps.get_version.outputs.version }}
         run: |
           mkdir -p build
           curl -u "${{ secrets.NEXUS_USERNAME }}:$NEXUS_PASS" \
             -o build.zip \
-            "${NEXUS_URL}/repository/${NEXUS_REPO}/${{ github.event.repository.name }}/${RC_TAG}/build.zip"
+            "${NEXUS_URL}/repository/${NEXUS_REPO}/${{ github.event.repository.name }}/${VERSION}/build.zip"
           unzip build.zip -d build/
 
       - name: Build and push Docker image
