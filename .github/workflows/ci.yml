@@ -69,3 +69,14 @@ jobs:
     secrets:
       nexus_username: ${{ secrets.NEXUS_USERNAME }}
       nexus_password: ${{ secrets.NEXUS_PASSWORD }}
+
+  # Deploy para produção apenas se for uma tag
+  call-production-deploy:
+    needs: build-and-test
+    if: startsWith(github.ref, 'refs/tags/v')
+    uses: ./.github/workflows/production.yml
+    with:
+      version: ${{ needs.build-and-test.outputs.version }}
+    secrets:
+      nexus_username: ${{ secrets.NEXUS_USERNAME }}
+      nexus_password: ${{ secrets.NEXUS_PASSWORD }}
