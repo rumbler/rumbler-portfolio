@@ -1,7 +1,7 @@
 services:
   app:
     image: registry.rumblersoppa.com.br/portfolio:${IMAGE_TAG:-dev}
-    container_name: rumbler-portfolio-${NODE_ENV:-production}
+    container_name: rumbler-portfolio-${NODE_ENV:-production}-${IMAGE_TAG:-dev}
     restart: unless-stopped
     ports:
       - "${PORT:-3000}:3000"
