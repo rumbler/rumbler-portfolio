@@ -1,0 +1,16 @@
+# Global code owners
+* @rumbler
+
+# Workflow files
+.github/workflows/* @rumbler
+
+# Documentation
+docs/* @rumbler
+
+# Source code
+src/* @rumbler
+
+# Configuration files
+*.yml @rumbler
+*.json @rumbler
+Dockerfile @rumbler
