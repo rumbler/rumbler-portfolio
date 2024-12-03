@@ -1,0 +1,21 @@
+services:
+  app:
+    image: registry.rumblersoppa.com.br/portfolio:${IMAGE_TAG:-dev}
+    container_name: rumbler-portfolio-${NODE_ENV:-production}
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    deploy:
+      resources:
+        limits:
+          cpus: '${DOCKER_CPU_LIMIT:-1}'
+          memory: ${DOCKER_MEMORY_LIMIT:-512M}
+        reservations:
+          cpus: '${DOCKER_CPU_RESERVE:-0.5}'
+          memory: ${DOCKER_MEMORY_RESERVE:-256M}
+    networks:
+      - portfolio-net
+
+networks:
+  portfolio-net:
+    driver: bridge
