@@ -25,7 +25,8 @@ on:
 jobs:
   deploy-release:
     name: Deploy to Release
-    runs-on: self-hosted
+    deploy:
+      runs-on: self-hosted
     environment:
       name: release
       url: https://hml.rumblersoppa.com.br
