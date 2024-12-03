@@ -42,11 +42,11 @@ jobs:
       
       - name: Download build from Nexus
         run: |
-          mkdir -p dist
+          mkdir -p build
           curl -v -u "${{ secrets.nexus_username }}:${{ secrets.nexus_password }}" \
             -o build.zip \
             "https://pkg.rumblersoppa.com.br/repository/raw-hosted/rumbler-portfolio/${{ inputs.version }}/build.zip"
-          unzip build.zip -d dist/
+          unzip build.zip -d build/
           rm build.zip
 
       - name: Login to Nexus Docker Registry
