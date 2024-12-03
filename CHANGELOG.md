@@ -1,3 +1,11 @@
+# Changelog
+
+## [1.0.1] - 2024-12-03
+
+### Other Changes
+
+- chore: sync development with main after version bump to 1.0.0
+
 ## [1.0.0] - 2024-12-02
 
 ### Added
