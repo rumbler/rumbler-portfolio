@@ -52,18 +52,18 @@ sync_all() {
     execute_cmd "git fetch --all"
 }
 
-# Check current branch and switch to main if needed
+# Check current branch and switch to development if needed
 CURRENT_BRANCH=$(git branch --show-current)
-if [ "$CURRENT_BRANCH" != "main" ]; then
+if [ "$CURRENT_BRANCH" != "development" ]; then
     if [ "$DRY_RUN" = true ]; then
-        echo "Not on main branch. Currently on: $CURRENT_BRANCH"
-        echo "Would switch to main branch and stash changes"
+        echo "Not on development branch. Currently on: $CURRENT_BRANCH"
+        echo "Would switch to development branch and stash changes"
     else
-        echo "Not on main branch. Currently on: $CURRENT_BRANCH"
-        echo "Stashing changes and switching to main..."
+        echo "Not on development branch. Currently on: $CURRENT_BRANCH"
+        echo "Stashing changes and switching to development..."
         execute_cmd "git stash -u"
-        execute_cmd "git checkout main"
-        echo "Successfully switched to main branch"
+        execute_cmd "git checkout development"
+        echo "Successfully switched to development branch"
     fi
 fi
 
@@ -93,113 +93,71 @@ FIXES=$(echo "$COMMITS" | grep "^- fix:" || true)
 DOCS=$(echo "$COMMITS" | grep "^- docs:" || true)
 OTHERS=$(echo "$COMMITS" | grep -vE "^- (feat|fix|docs):" || true)
 
-# Calculate new version without making changes
-if [ "$DRY_RUN" = true ]; then
-    case $VERSION_TYPE in
-        patch)
-            NEW_VERSION=$(echo "$CURRENT_VERSION" | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')
-            ;;
-        minor)
-            NEW_VERSION=$(echo "$CURRENT_VERSION" | awk -F. '{$(NF-1) = $(NF-1) + 1; $NF = 0;} 1' | sed 's/ /./g')
-            ;;
-        major)
-            NEW_VERSION=$(echo "$CURRENT_VERSION" | awk -F. '{$1 = $1 + 1; $(NF-1) = 0; $NF = 0;} 1' | sed 's/ /./g')
-            ;;
-    esac
-else
-    # Bump version
-    echo "Preparing $VERSION_TYPE version bump..."
-    execute_cmd "pnpm version $VERSION_TYPE --no-git-tag-version"
-    NEW_VERSION=$(pnpm pkg get version | tr -d '"')
-fi
+# Calculate new version
+case $VERSION_TYPE in
+    patch)
+        NEW_VERSION=$(echo "$CURRENT_VERSION" | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')
+        ;;
+    minor)
+        NEW_VERSION=$(echo "$CURRENT_VERSION" | awk -F. '{$(NF-1) = $(NF-1) + 1; $NF = 0;} 1' | sed 's/ /./g')
+        ;;
+    major)
+        NEW_VERSION=$(echo "$CURRENT_VERSION" | awk -F. '{$1 = $1 + 1; $(NF-1) = 0; $NF = 0;} 1' | sed 's/ /./g')
+        ;;
+esac
 
-# Create CHANGELOG entry
-CHANGELOG_ENTRY="## [$NEW_VERSION] - $(date +%Y-%m-%d)
-
-### Added
-${FEATURES:-"No new features"}
-
-### Fixed
-${FIXES:-"No fixes"}
-
-### Documentation
-${DOCS:-"No documentation changes"}
-
-### Other Changes
-${OTHERS:-"No other changes"}
-"
-
-# Show proposed changes
-echo "
-=== Proposed Changes ===
-1. Version bump: $CURRENT_VERSION -> $NEW_VERSION
-2. VERSION file will be updated
-3. New CHANGELOG entry will be:
-
-$CHANGELOG_ENTRY
-
-=== Git Operations ===
-1. Create commit with message: chore(release): bump version to $NEW_VERSION
-2. Create tag: v$NEW_VERSION
-3. Push main branch with tags
-4. Switch to development
-5. Sync development with remote
-6. Merge main into development
-7. Push development
-"
-
-if [ "$DRY_RUN" = true ]; then
-    echo "=== DRY RUN COMPLETE ==="
-    echo "No changes were made. Run without --dry-run to apply changes."
-    exit 0
-fi
-
-# Only ask for confirmation in real run
+# Create version bump branch
 if [ "$DRY_RUN" = false ]; then
-    printf "\nAre you sure you want to proceed? [y/N] "
-    read -r response
-    if [[ ! "$response" =~ ^[Yy]$ ]]; then
-        echo "Operation cancelled"
-        exit 1
+    BUMP_BRANCH="version/bump-to-$NEW_VERSION"
+    execute_cmd "git checkout -b $BUMP_BRANCH"
+fi
+
+# Update version in package.json
+if [ "$DRY_RUN" = false ]; then
+    execute_cmd "pnpm version $NEW_VERSION --no-git-tag-version"
+fi
+
+# Generate changelog content
+CHANGELOG_CONTENT="## [${NEW_VERSION}] - $(date +%Y-%m-%d)\n\n"
+
+if [ -n "$FEATURES" ]; then
+    CHANGELOG_CONTENT="${CHANGELOG_CONTENT}### Features\n\n${FEATURES}\n\n"
+fi
+
+if [ -n "$FIXES" ]; then
+    CHANGELOG_CONTENT="${CHANGELOG_CONTENT}### Bug Fixes\n\n${FIXES}\n\n"
+fi
+
+if [ -n "$DOCS" ]; then
+    CHANGELOG_CONTENT="${CHANGELOG_CONTENT}### Documentation\n\n${DOCS}\n\n"
+fi
+
+if [ -n "$OTHERS" ]; then
+    CHANGELOG_CONTENT="${CHANGELOG_CONTENT}### Other Changes\n\n${OTHERS}\n\n"
+fi
+
+# Update CHANGELOG.md
+if [ "$DRY_RUN" = false ]; then
+    if [ -f CHANGELOG.md ]; then
+        # Preserve existing content
+        EXISTING_CONTENT=$(cat CHANGELOG.md)
+        echo -e "# Changelog\n\n${CHANGELOG_CONTENT}${EXISTING_CONTENT#\# Changelog}" > CHANGELOG.md
+    else
+        echo -e "# Changelog\n\n${CHANGELOG_CONTENT}" > CHANGELOG.md
     fi
 fi
 
-# Add new entry to CHANGELOG.md
-execute_cmd "echo \"$CHANGELOG_ENTRY\" | cat - CHANGELOG.md > temp && mv temp CHANGELOG.md"
-
-# Update VERSION file
-execute_cmd "echo \"$NEW_VERSION\" > VERSION"
-
 # Commit changes
-echo "Committing version bump..."
-execute_cmd "git add package.json VERSION CHANGELOG.md"
-execute_cmd "git commit -m \"chore(release): bump version to $NEW_VERSION\""
-
-# Create tag
-echo "Creating version tag..."
-execute_cmd "git tag -a \"v$NEW_VERSION\" -m \"Release v$NEW_VERSION\""
-
-# Push main with tags
-echo "Pushing main branch with tags..."
-execute_cmd "git push origin main --follow-tags"
-
-# Switch to development
-echo "Switching to development branch..."
-execute_cmd "git checkout development"
-
-# Sync development
-echo "Synchronizing development branch..."
-sync_all
-
-echo "Merging main into development..."
-execute_cmd "git merge main --no-ff -m \"chore: sync development with main after version bump to $NEW_VERSION\""
-
-echo "Pushing development branch..."
-execute_cmd "git push origin development"
-
-echo "
-=== Version Bump Complete ===
-- New version: $NEW_VERSION
-- Changes pushed to main
-- Development synced and updated
-- Current branch: development"
+if [ "$DRY_RUN" = false ]; then
+    execute_cmd "git add package.json CHANGELOG.md"
+    execute_cmd "git commit -m \"bump version ($NEW_VERSION)\""
+    execute_cmd "git push origin $BUMP_BRANCH"
+    
+    echo "✨ Branch $BUMP_BRANCH created successfully!"
+    echo "🔍 Create a Pull Request to main branch to continue the release process"
+else
+    echo "Changes that would be made:"
+    echo "- Update version to $NEW_VERSION"
+    echo "- Update CHANGELOG.md"
+    echo "- Create and push branch $BUMP_BRANCH"
+fi

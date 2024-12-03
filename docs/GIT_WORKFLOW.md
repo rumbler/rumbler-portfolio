@@ -1,24 +1,25 @@
 # 🔄 Git Workflow
 
-This document describes the Git practices adopted in this project.
+This document describes the Git practices adopted in this project, following GitHub Flow.
 
 ## 🌳 Main Branches
 
 ### `main`
 
-- 🚫 Production branch
-- Always stable and ready for deployment
+- 🚫 Pre-production (release) branch
+- Always stable and ready for final testing
 - Protected: no direct commits allowed
-- Receives merges only from `development` branch
-- Where version tags are created
+- Receives merges only from `development` via Pull Request
+- Generates RC tags automatically after each merge
+- Base for production tags creation
 
 ### `development`
 
-- 🌱 Development branch
+- 🌱 Development and staging branch
 - Integration environment
 - Receives feature branch merges
-- Testing environment
 - Base for new features
+- Automatic deployment to staging environment
 
 ## 📝 Temporary Branches
 
@@ -27,7 +28,7 @@ This document describes the Git practices adopted in this project.
 - Naming: `feat/feature-name`
 - Created from `development`
 - Example: `feat/add-contact-section`
-- Merged back to `development`
+- Merged via PR to `development`
 
 ### Fix Branches
 
@@ -35,7 +36,7 @@ This document describes the Git practices adopted in this project.
 - Production bugs:
   - Created from `main`
   - Merged to both `main` AND `development`
-  - Triggers PATCH version bump (0.4.0 -> 0.4.1)
+  - Triggers PATCH version (0.4.0 -> 0.4.1)
 - Development bugs:
   - Created from `development`
   - Merged only to `development`
@@ -46,203 +47,67 @@ This document describes the Git practices adopted in this project.
 - Created from current project branch
 - Example: `docs/api-documentation`
 
+## 🏷️ Versioning
+
+### RC Tags (Release Candidate)
+
+- Generated automatically after merge to `main`
+- Format: `vX.Y.Z-rc.N`
+  - X.Y.Z: current or next version
+  - N: incremental RC number
+- Example: `v1.2.0-rc.1`, `v1.2.0-rc.2`
+- Automatic deployment to release environment
+
+### Production Tags
+
+- Created manually after RC validation
+- Format: `vX.Y.Z`
+- Follows Semantic Versioning:
+  - MAJOR (X): incompatible changes
+  - MINOR (Y): new backwards-compatible features
+  - PATCH (Z): backwards-compatible bug fixes
+- Example: `v1.2.0`, `v1.2.1`
+- Automatic deployment to production
+
 ## 📝 Commit Types
 
 - `feat`: ✨ new feature
 - `fix`: 🐛 bug fix
-- `docs`: 📚 documentation changes
-- `style`: 💅 formatting, semicolons, etc; no code change
+- `docs`: 📚 documentation
+- `style`: 💎 formatting, semicolons, etc
 - `refactor`: ♻️ code refactoring
-- `test`: ✅ adding or updating tests
-- `chore`: 🔧 build updates, package updates, etc
+- `test`: 🧪 tests
+- `chore`: 🔧 build, dependencies, etc
 
 ## 🔄 Workflow
 
-1. Create new branch from appropriate base:
+1. **Feature Development**
+   - Create branch `feat/name` from `development`
+   - Develop and commit changes
+   - Open PR to `development`
+   - Merge after approval
 
-```bash
-git checkout development
-git checkout -b feat/new-feature
-```
+2. **Release Preparation**
+   - Open PR from `development` to `main`
+   - After approval and merge:
+     - CI generates RC tag automatically
+     - Deploys to release environment
 
-1. Develop and commit changes:
+3. **Production Release**
+   - Test RC version in release environment
+   - If approved:
+     - Create production tag manually
+     - CI deploys to production
+   - If issues found:
+     - Fix in `development`
+     - New PR to `main`
+     - New RC generated
 
-```bash
-git add .
-git commit -m "feat: add new feature"
-```
+## ✅ Best Practices
 
-1. Keep branch updated:
-
-```bash
-git checkout development
-git pull
-git checkout feat/new-feature
-git merge development --no-ff
-```
-
-> 💡 We use `--no-ff` to preserve branch history and maintain change context by preventing fast-forward merges.
-
-1. Push and Pull Request:
-
-```bash
-git push origin feat/new-feature
-# Create PR on GitHub: feat/new-feature -> development
-```
-
-1. After approval and merge, clean up:
-
-```bash
-git checkout development
-git pull
-git branch -d feat/new-feature
-git push origin --delete feat/new-feature
-```
-
-## 🏷️ Versioning
-
-We follow Semantic Versioning (MAJOR.MINOR.PATCH):
-
-- MAJOR (0.4.0 -> 1.0.0): incompatible API changes
-- MINOR (0.4.0 -> 0.5.0): backwards-compatible features
-- PATCH (0.4.0 -> 0.4.1): backwards-compatible bug fixes
-
-## 🔢 Version Management
-
-### Version Bump Process
-
-We use semantic versioning (MAJOR.MINOR.PATCH) and manage versions through an automated process using pnpm scripts.
-
-#### Prerequisites
-- Ensure you have `pnpm` installed
-- Have `git` configured
-- All changes must be merged to `main` first
-- CI/CD pipeline must be passing
-
-#### Running Version Bump
-
-Use one of the following pnpm commands based on the type of change:
-
-```bash
-# For bug fixes and small improvements (0.4.2 -> 0.4.3)
-pnpm version:patch
-
-# For new features (0.4.2 -> 0.5.0)
-pnpm version:minor
-
-# For breaking changes (0.4.2 -> 1.0.0)
-pnpm version:major
-```
-
-#### Testing Version Bump (Dry Run)
-
-To simulate a version bump without making any changes, use the dry-run commands:
-
-```bash
-# Simulate patch version bump
-pnpm version:patch:dry
-
-# Simulate minor version bump
-pnpm version:minor:dry
-
-# Simulate major version bump
-pnpm version:major:dry
-```
-
-The dry run will:
-- Show all proposed changes
-- Calculate the new version
-- Display the CHANGELOG entry
-- List all git operations
-- Not make any actual changes
-
-#### When to Use Each Version Type
-
-- **PATCH** (0.0.x): 
-  - Bug fixes
-  - Small improvements
-  - Documentation updates
-  - No breaking changes
-
-- **MINOR** (0.x.0):
-  - New features
-  - Substantial improvements
-  - Deprecation notices
-  - No breaking changes
-
-- **MAJOR** (x.0.0):
-  - Breaking changes
-  - Major redesigns
-  - Incompatible API changes
-
-#### Version Bump Best Practices
-
-- Always run version bumps from `main` branch (script handles this automatically)
-- Ensure all changes are properly documented
-- Review generated CHANGELOG entries
-- Verify CI/CD pipeline after version bump
-- Use meaningful commit messages following conventional commits:
-  - `feat:` for new features
-  - `fix:` for bug fixes
-  - `docs:` for documentation
-  - `chore:` for maintenance
-
-> 💡 Tip: The automated script helps maintain consistency, but always review the generated changes before confirming.
-
-## 🏷️ Version Control
-
-1. Merge `development` to `main`:
-
-```bash
-git checkout main
-git merge development --no-ff
-```
-
-> 💡 We use `--no-ff` to preserve branch history and maintain change context by preventing fast-forward merges.
-
-1. Version bump and tag:
-
-```bash
-pnpm version:patch
-```
-
-## 🎯 Branch Naming
-
-- Feature: `feat/feature-name`
-- Bug Fix: `fix/bug-name`
-- Documentation: `docs/what-changed`
-- Refactor: `refactor/what-changed`
-
-## ⚡ Quick Tips
-
-- Always pull before starting new work
-- Keep commits atomic and focused
+- Keep commits small and focused
 - Write meaningful commit messages
 - Update documentation when needed
-
-## 📝 Best Practices
-
-1. Never commit directly to `main` or `development`
-2. Keep branches updated with their bases
-3. Create small, focused pull requests
-4. Review code before merging
-5. Delete branches after merging
-6. Always write commit messages in English
-7. Use the correct commit type prefix
-8. Write meaningful commit messages
-9. Update documentation when needed
-
-## 📝 Initial Setup
-
-For new developers:
-
-```bash
-git clone [repository-url]
-git checkout development
-```
-
-## 🤖 CI/CD
-
-- Pull Requests to `development`: run tests and lint
-- Merge to `main`: automatic production deployment
-- Tags: generate GitHub releases
+- Always create PR for `main`
+- Perform thorough code reviews
+- Test RCs properly before production
