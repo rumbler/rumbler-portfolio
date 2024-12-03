@@ -41,9 +41,11 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Download build from Nexus
+        env:
+          NEXUS_PASS: ${{ secrets.nexus_password }}
         run: |
           mkdir -p build
-          curl -u "${{ secrets.nexus_username }}:${{ secrets.nexus_password }}" \
+          curl -u "${{ secrets.nexus_username }}:$NEXUS_PASS" \
             -o build.zip \
             "https://pkg.rumblersoppa.com.br/repository/raw-hosted/rumbler-portfolio/${{ inputs.version }}/build.zip"
           unzip build.zip -d build/
