@@ -1,19 +1,22 @@
-# Rumbler Soppa Portfolio 🚀
+# Portfolio Project 🚀
 
-[![Continuous Integration](https://github.com/rumbler/rumbler-portfolio/actions/workflows/ci.yml/badge.svg)](https://github.com/rumbler/rumbler-portfolio/actions/workflows/ci.yml)
+[![CI](https://github.com/rumbler/rumbler-portfolio/actions/workflows/ci.yml/badge.svg)](https://github.com/rumbler/rumbler-portfolio/actions/workflows/ci.yml)
+[![Development](https://github.com/rumbler/rumbler-portfolio/actions/workflows/development.yml/badge.svg)](https://github.com/rumbler/rumbler-portfolio/actions/workflows/development.yml)
+[![Production](https://github.com/rumbler/rumbler-portfolio/actions/workflows/production.yml/badge.svg)](https://github.com/rumbler/rumbler-portfolio/actions/workflows/production.yml)
 
-> A modern and responsive portfolio built with React and TypeScript, showcasing my expertise as a DevOps specialist.
+> A modern and responsive portfolio built with React and TypeScript.
 
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Styled Components](https://img.shields.io/badge/styled--components-DB7093?style=for-the-badge&logo=styled-components&logoColor=white)](https://styled-components.com/)
 [![Jest](https://img.shields.io/badge/Jest-C21325?style=for-the-badge&logo=jest&logoColor=white)](https://jestjs.io/)
+[![GitHub Actions](https://img.shields.io/badge/github%20actions-%232671E5.svg?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/features/actions)
+[![Nexus](https://img.shields.io/badge/Nexus%20Repository-143752?style=for-the-badge&logo=sonatype&logoColor=white)](https://www.sonatype.com/products/nexus-repository)
+[![Cloudflare](https://img.shields.io/badge/Cloudflare-F38020?style=for-the-badge&logo=cloudflare&logoColor=white)](https://www.cloudflare.com)
 
 ## Highlights
 
 - Modern and responsive design
-- Material Design 3 typography system
-- Light/Dark theme support
 - Component-based architecture
 - Mobile-optimized
 - Comprehensive test coverage
@@ -57,57 +60,23 @@
 ## Project Structure
 
 ```bash
-rumbler-portfolio/
-├── docs/              # Detailed documentation
-│   └── TYPOGRAPHY.md  # Typography system documentation
+portfolio/
 ├── public/            # Static files
 └── src/
     ├── components/    # React components
     │   └── __tests__  # Component tests
     ├── styles/        # Themes and global styles
-    │   ├── typography.ts    # Typography definitions
     │   ├── themes.ts       # Theme configurations
     │   └── globalStyles.ts # Global style definitions
     ├── types/         # TypeScript definitions
     └── utils/         # Utility functions
 ```
 
-## Design System
+## Environments
 
-The project follows Material Design 3 guidelines for a consistent and modern user experience:
-
-### Typography
-
-The typography system has been updated to use Material Design 3's type scale. This provides:
-
-- Consistent text hierarchy
-- Improved readability
-- Responsive scaling
-- Semantic HTML mapping
-
-For detailed information about the typography system, check out the [Typography Documentation](./docs/TYPOGRAPHY.md).
-
-### Themes
-
-The project includes both light and dark themes, with:
-
-- Consistent color palette
-- Accessible contrast ratios
-- Smooth theme transitions
-- Material Design color tokens
-
-## Documentation
-
-For detailed documentation about components, themes, and more, check out the [docs folder](./docs):
-
-- [Style Guide](./docs/STYLE_GUIDE.md)
-- [Git Workflow](./docs/GIT_WORKFLOW.md)
-- [Testing Guide](./docs/TESTING.md)
-- [Typography System](./docs/TYPOGRAPHY.md)
-- [Components](./docs/components/)
-  - [Button](./docs/components/BUTTON.md)
-  - [Typography](./docs/components/TYPOGRAPHY.md)
-  - [Theme](./docs/components/THEME.md)
+- **Development**: [dev.example.com](https://dev.example.com)
+- **Release**: [release.example.com](https://release.example.com)
+- **Production**: [example.com](https://example.com)
 
 ## License
 

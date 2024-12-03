@@ -2,11 +2,18 @@ name: Continuous Integration
 
 on:
   push:
-    branches: ["development", "main"]  # Main needs push trigger for RC tags
-    tags:
-      - 'v*'
+    branches: 
+      - "feat/**"
+      - "fix/**"
+      - "docs/**"
+      - "style/**"
+      - "refactor/**"
+      - "test/**"
+      - "chore/**"
   pull_request:
-    branches: ["main", "development"]
+    branches: 
+      - "development"
+      - "main"
 
 jobs:
   build-and-test:
@@ -44,62 +51,20 @@ jobs:
     - name: Set Version
       id: version
       run: |
-        if [[ $GITHUB_REF == refs/tags/* ]]; then
-          # For production tags (v*)
-          VERSION=${GITHUB_REF#refs/tags/}
-        elif [[ $GITHUB_REF == refs/heads/main ]]; then
-          # For main branch (via PR merge), create RC tag with commit hash
-          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-          COMMIT_HASH=$(git rev-parse --short HEAD)
-          VERSION="${LAST_TAG%-*}-rc.${COMMIT_HASH}"
-          # Create and push RC tag
-          git tag $VERSION
-          git push origin $VERSION
+        if [[ $GITHUB_REF == refs/pull/* ]]; then
+          PR_NUMBER=$(echo $GITHUB_REF | cut -d / -f 3)
+          VERSION="pr-${PR_NUMBER}-$(git rev-parse --short HEAD)"
         else
-          # For development and other branches
           VERSION=$(git rev-parse --short HEAD)
         fi
         echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-    # Upload to Nexus except for PRs
+    # Upload to Nexus except for PRs to main
     - name: Upload to Nexus
-      if: github.event_name != 'pull_request'
+      if: github.base_ref != 'main'
       env:
         NEXUS_PASS: ${{ secrets.NEXUS_PASSWORD }}
       run: |
         curl -u "${{ secrets.NEXUS_USERNAME }}:$NEXUS_PASS" \
           --upload-file build.zip \
           "https://pkg.rumblersoppa.com.br/repository/raw-hosted/rumbler-portfolio/${{ steps.version.outputs.version }}/build.zip"
-
-  # Deploy to development only on push to development branch
-  call-development-deploy:
-    needs: build-and-test
-    if: github.ref == 'refs/heads/development' && github.event_name == 'push'
-    uses: ./.github/workflows/development.yml
-    with:
-      version: ${{ needs.build-and-test.outputs.version }}
-    secrets:
-      nexus_username: ${{ secrets.NEXUS_USERNAME }}
-      nexus_password: ${{ secrets.NEXUS_PASSWORD }}
-
-  # Deploy to release only after PR merge to main
-  call-release-deploy:
-    needs: build-and-test
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    uses: ./.github/workflows/release.yml
-    with:
-      version: ${{ needs.build-and-test.outputs.version }}
-    secrets:
-      nexus_username: ${{ secrets.NEXUS_USERNAME }}
-      nexus_password: ${{ secrets.NEXUS_PASSWORD }}
-
-  # Deploy to production only on version tags
-  call-production-deploy:
-    needs: build-and-test
-    if: startsWith(github.ref, 'refs/tags/v')
-    uses: ./.github/workflows/production.yml
-    with:
-      version: ${{ needs.build-and-test.outputs.version }}
-    secrets:
-      nexus_username: ${{ secrets.NEXUS_USERNAME }}
-      nexus_password: ${{ secrets.NEXUS_PASSWORD }}
