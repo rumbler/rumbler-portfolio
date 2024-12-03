@@ -58,9 +58,9 @@ jobs:
       env:
         NEXUS_PASS: ${{ secrets.NEXUS_PASSWORD }}
       run: |
-        FILE_SIZE=$(stat -f%z build.zip)
+        FILE_SIZE=$(stat -f %s build.zip)
         echo "File size: $FILE_SIZE bytes"
-        curl -v -u "${{ secrets.NEXUS_USERNAME }}:$NEXUS_PASS" \
+        curl -u "${{ secrets.NEXUS_USERNAME }}:$NEXUS_PASS" \
           --upload-file build.zip \
           "https://pkg.rumblersoppa.com.br/repository/raw-hosted/rumbler-portfolio/${{ steps.version.outputs.version }}/build.zip"
         echo "Upload completed successfully!"
