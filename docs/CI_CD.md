@@ -1,120 +1,145 @@
-# CI/CD Workflows
+# CI/CD Pipeline
 
-This document describes the CI/CD workflows for the Rumbler Portfolio project, following GitHub Flow.
+This document describes the CI/CD rules and workflow for the project.
 
-## Overview
-
-The project follows GitHub Flow with four environments in a logical progression:
-
-- Development - For testing during development (commit hash)
-- Staging - Development branch, for validation (commit hash)
-- Release - Main branch, for pre-release (RC tag, e.g., v1.2.0-rc.1)
-- Production - Only stable version tags (e.g., v1.2.0)
-
-## Branch Protection Rules
-
-### Main Branch
-
-- Protected from direct pushes
-- Requires pull request with approved reviews
-- Must pass CI checks before merging
-- Automatically generates RC tags on merge
-
-### Development Branch
-
-- Base branch for feature development
-- Requires CI checks to pass
-- Recommended code review for pull requests
-
-## Workflows
+## Execution Rules
 
 ### Continuous Integration (CI)
 
-The CI workflow runs on:
+CI should be executed in the following situations:
 
-- All pushes to `development`
-- All pull requests to `main` and `development`
-- All version tags (`v*`)
-- All merges to `main` (via pull request)
+1. **Feature Branch Pushes:**
+   - `feat/*`
+   - `fix/*`
+   - `docs/*`
+   - `style/*`
+   - `refactor/*`
+   - `test/*`
+   - `chore/*`
 
-CI Steps:
-
-1. Application build and test
-2. Artifact upload to Nexus (except for PRs)
-3. Version generation:
-
-- For production tags: uses the tag itself (e.g., v1.2.0)
-- For main branch: generates automatic RC tag (e.g., v1.2.0-rc.1)
-- For development: uses short commit hash
+2. **Pull Requests:**
+   - From feature branches to `development`
+   - From `development` to `main`
 
 ### Continuous Deployment (CD)
 
-#### Development Environment
+CD is divided into three environments:
 
-- Trigger: Push to `development` branch
-- Docker Tag: `development`
-- Purpose: Testing during development
-- Version: Commit hash
+1. **Development Environment:**
+   - Triggered when feature branch PRs are merged to `development`
+   - Uses CI-generated artifact
+   - Docker image tag: `development`
 
-#### Staging Environment
+2. **Release Environment:**
+   - Triggered when `development` PR is merged to `main`
+   - Uses CI-generated artifact
+   - Docker image tag: `release`
 
-- Trigger: Push to `development` branch after CI
-- Docker Tag: `staging`
-- Purpose: Feature validation before merging to main
-- Version: Commit hash
+3. **Production Environment:**
+   - Triggered when a `v*` tag is pushed to `main`
+   - Uses Nexus artifact from release
+   - Docker image tags: `latest` and specific version
 
-#### Release Environment (Pre-Production)
+### When NOT to Execute CI/CD
 
-- Trigger: Merge to `main` branch (via pull request)
-- Docker Tag: `release`
-- Purpose: Final validation before release
-- Protection: Deploy only from `main` branch via PR merges
-- Version: Automatic RC tag (e.g., v1.2.0-rc.1)
+CI/CD should not be executed in these cases:
 
-#### Production Environment
+1. Direct pushes to main branches:
+   - `main` (blocked)
+   - `development` (blocked)
 
-- Trigger: Manual version tag creation (v*)
-- Docker Tag: tag version (e.g., v1.2.0)
-- Purpose: Production environment
-- Protection: Deploy only from manually created stable version tags
-- Version: Stable tag (e.g., v1.2.0)
+2. Commits in already open PRs (CI already executed)
 
-## GitHub Flow Process
+3. Changes only in non-code files:
+   - `.md`
+   - `.txt`
+   - `.gitignore`
+   - etc.
 
-1. Development:
+4. PRs with status:
+   - Closed
+   - Draft
+   - Not following naming convention
 
-- Create feature branch from `development`
-- Work on changes in feature branch
-- Open PR to `development` when ready
-- After review and approval, merge to `development`
-- Automatic deploy to staging with commit hash
+## Artifact Flow
 
-1. Release:
+1. **CI Build:**
+   - Generates application artifact
+   - Uploads to Nexus Repository
 
-- Create PR from `development` to `main` when features are ready
-- Review and testing required
-- After approval and merge:
-- CI automatically creates RC tag
-- Deploys to release environment with RC tag
+2. **CD Development/Release:**
+   - Downloads CI artifact from Nexus
+   - Builds Docker image
+   - Publishes to Registry
+   - Deploys to environment
 
-1. Production:
+3. **CD Production:**
+   - Downloads release artifact from Nexus
+   - Builds Docker image
+   - Publishes to Registry
+   - Deploys to production
 
-- Test thoroughly in release environment
-  - If approved:
-    - Manually create stable version tag (v*)
-    - Automatic deploy to production with stable tag
-  - If issues found:
-    - Fix in development and repeat process
+## Pipeline Flow
 
-## Versioning
+```mermaid
+graph TD
+    A[Feature Branch] -->|Push| B[CI Build]
+    B -->|Success| C[Nexus Artifact]
+    
+    D[PR to Development] -->|Merge| E[Development Deploy]
+    E -->|Pull| C
+    E -->|Push| F[Docker Registry]
+    F -->|Deploy| G[Development Environment]
+    
+    H[PR to Main] -->|Merge| I[Release Deploy]
+    I -->|Pull| C
+    I -->|Push| F
+    F -->|Deploy| J[Release Environment]
+    
+    K[Tag v*] -->|Push| L[Production Deploy]
+    L -->|Pull| C
+    L -->|Push| F
+    F -->|Deploy| M[Production Environment]
+```
 
-We follow Semantic Versioning (SemVer):
+## Environment Variables
 
-- **Stable Version**: v1.2.3
-  - MAJOR (1): Incompatible changes
-  - MINOR (2): New compatible features
-  - PATCH (3): Bug fixes
+### Required Secrets
 
-- **Release Candidate**: v1.2.3-rc.1
-  - Automatically generated after merge to main
-  - Number increments with each new merge
+- `NEXUS_USERNAME`: Nexus user
+- `NEXUS_PASSWORD`: Nexus password
+- `NEXUS_URL`: Nexus Repository URL
+- `NEXUS_REPOSITORY`: Nexus repository name
+- `REGISTRY_URL`: Docker Registry URL
+
+## Manual Deployment
+
+All environments support manual deployment through GitHub Actions `workflow_dispatch`, allowing version specification for deployment.
+
+## Troubleshooting
+
+### Common Issues
+
+1. **CI Build Failure**
+   - Verify test failures in GitHub Actions logs
+   - Check if all dependencies are installed
+   - Ensure environment variables are set
+
+2. **Deployment Issues**
+   - Check if Nexus artifact exists
+   - Verify Docker Registry connectivity
+   - Validate environment variables
+   - Check container logs
+
+3. **Environment Access**
+   - Development: <https://dev.example.com>
+   - Release: <https://release.example.com>
+   - Production: <https://example.com>
+
+### Support
+
+For deployment issues:
+
+1. Check GitHub Actions logs
+2. Verify Nexus Repository
+3. Contact your DevOps team

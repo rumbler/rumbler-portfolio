@@ -8,7 +8,14 @@ This document describes the Git practices adopted in this project, following Git
 
 - 🚫 Pre-production (release) branch
 - Always stable and ready for final testing
-- Protected: no direct commits allowed
+- Protected branch rules:
+  - No direct pushes allowed
+  - Requires pull request before merging
+  - Requires minimum 1 approval
+  - Must be up to date before merging
+  - Status checks must pass before merging
+  - Branch cannot be deleted
+  - Linear history required (no merge commits)
 - Receives merges only from `development` via Pull Request
 - Generates RC tags automatically after each merge
 - Base for production tags creation
@@ -17,6 +24,14 @@ This document describes the Git practices adopted in this project, following Git
 
 - 🌱 Development and staging branch
 - Integration environment
+- Protected branch rules:
+  - No direct pushes allowed
+  - Requires pull request before merging
+  - Requires minimum 1 approval
+  - Must be up to date before merging
+  - Status checks must pass before merging
+  - Branch cannot be deleted
+  - Linear history required (no merge commits)
 - Receives feature branch merges
 - Base for new features
 - Automatic deployment to staging environment
