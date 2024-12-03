@@ -3,7 +3,7 @@
 # Exit on error
 set -e
 
-# Check if help is requested (before any git operations)
+# Check if help is requested
 if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$2" = "--help" ] || [ "$2" = "-h" ]; then
     echo "Usage: $0 [patch|minor|major] [--dry-run]"
     echo "Options:"
@@ -42,58 +42,20 @@ execute_cmd() {
     fi
 }
 
-# Function to sync all branches
-sync_all() {
-    if [ "$DRY_RUN" = true ]; then
-        echo "Would synchronize branches..."
-        return
-    fi
-    echo "Fetching all changes..."
-    execute_cmd "git fetch --all"
-}
-
-# Check current branch and switch to development if needed
+# Check current branch and ensure we're on main
 CURRENT_BRANCH=$(git branch --show-current)
-if [ "$CURRENT_BRANCH" != "development" ]; then
-    if [ "$DRY_RUN" = true ]; then
-        echo "Not on development branch. Currently on: $CURRENT_BRANCH"
-        echo "Would switch to development branch and stash changes"
-    else
-        echo "Not on development branch. Currently on: $CURRENT_BRANCH"
-        echo "Stashing changes and switching to development..."
-        execute_cmd "git stash -u"
-        execute_cmd "git checkout development"
-        echo "Successfully switched to development branch"
-    fi
-fi
-
-# Sync everything before starting
-sync_all
-
-# Check for uncommitted changes
-if [ -n "$(git status --porcelain)" ] && [ "$DRY_RUN" = false ]; then
-    echo "Error: Working directory is not clean. Commit or stash changes first."
+if [ "$CURRENT_BRANCH" != "main" ]; then
+    echo "Error: Must be on main branch to create production tag"
     exit 1
 fi
 
-# Get current version before bump
+# Sync with remote
+echo "Fetching latest changes..."
+execute_cmd "git fetch --tags"
+
+# Get current version and calculate new version
 CURRENT_VERSION=$(pnpm pkg get version | tr -d '"')
 
-# Get commit messages since last tag
-LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-if [ -n "$LAST_TAG" ]; then
-    COMMITS=$(git log $LAST_TAG..HEAD --pretty=format:"- %s" | grep -vE "^- Merge |^- chore\(release\)")
-else
-    COMMITS=$(git log --pretty=format:"- %s" | grep -vE "^- Merge |^- chore\(release\)")
-fi
-
-# Categorize commits
-FEATURES=$(echo "$COMMITS" | grep "^- feat:" || true)
-FIXES=$(echo "$COMMITS" | grep "^- fix:" || true)
-DOCS=$(echo "$COMMITS" | grep "^- docs:" || true)
-OTHERS=$(echo "$COMMITS" | grep -vE "^- (feat|fix|docs):" || true)
-
-# Calculate new version
 case $VERSION_TYPE in
     patch)
         NEW_VERSION=$(echo "$CURRENT_VERSION" | awk -F. '{$NF = $NF + 1;} 1' | sed 's/ /./g')
@@ -106,58 +68,49 @@ case $VERSION_TYPE in
         ;;
 esac
 
-# Create version bump branch
-if [ "$DRY_RUN" = false ]; then
-    BUMP_BRANCH="version/bump-to-$NEW_VERSION"
-    execute_cmd "git checkout -b $BUMP_BRANCH"
+# Get latest RC tag for this version
+LATEST_RC=$(git tag -l "v${CURRENT_VERSION}-rc.*" | sort -V | tail -n1)
+
+if [ -z "$LATEST_RC" ]; then
+    echo "Error: No RC tag found for version ${CURRENT_VERSION}"
+    exit 1
 fi
 
-# Update version in package.json
-if [ "$DRY_RUN" = false ]; then
-    execute_cmd "pnpm version $NEW_VERSION --no-git-tag-version"
+echo "
+=== Version Tag Creation ===
+Current version: $CURRENT_VERSION
+New version: $NEW_VERSION
+Based on RC: $LATEST_RC
+
+This will:
+1. Create tag v$NEW_VERSION from $LATEST_RC
+2. Push tag to remote
+3. CI will automatically deploy to production
+"
+
+if [ "$DRY_RUN" = true ]; then
+    echo "=== DRY RUN COMPLETE ==="
+    echo "No changes were made. Run without --dry-run to apply changes."
+    exit 0
 fi
 
-# Generate changelog content
-CHANGELOG_CONTENT="## [${NEW_VERSION}] - $(date +%Y-%m-%d)\n\n"
-
-if [ -n "$FEATURES" ]; then
-    CHANGELOG_CONTENT="${CHANGELOG_CONTENT}### Features\n\n${FEATURES}\n\n"
+# Ask for confirmation
+printf "\nAre you sure you want to proceed? [y/N] "
+read -r response
+if [[ ! "$response" =~ ^[Yy]$ ]]; then
+    echo "Operation cancelled"
+    exit 1
 fi
 
-if [ -n "$FIXES" ]; then
-    CHANGELOG_CONTENT="${CHANGELOG_CONTENT}### Bug Fixes\n\n${FIXES}\n\n"
-fi
+# Create and push tag
+echo "Creating production tag v$NEW_VERSION from $LATEST_RC..."
+execute_cmd "git tag -a v$NEW_VERSION $LATEST_RC -m \"Release v$NEW_VERSION\""
+execute_cmd "git push origin v$NEW_VERSION"
 
-if [ -n "$DOCS" ]; then
-    CHANGELOG_CONTENT="${CHANGELOG_CONTENT}### Documentation\n\n${DOCS}\n\n"
-fi
+echo "
+=== Version Tag Created ===
+✅ Tag v$NEW_VERSION created and pushed
+🚀 CI will now deploy to production
 
-if [ -n "$OTHERS" ]; then
-    CHANGELOG_CONTENT="${CHANGELOG_CONTENT}### Other Changes\n\n${OTHERS}\n\n"
-fi
-
-# Update CHANGELOG.md
-if [ "$DRY_RUN" = false ]; then
-    if [ -f CHANGELOG.md ]; then
-        # Preserve existing content
-        EXISTING_CONTENT=$(cat CHANGELOG.md)
-        echo -e "# Changelog\n\n${CHANGELOG_CONTENT}${EXISTING_CONTENT#\# Changelog}" > CHANGELOG.md
-    else
-        echo -e "# Changelog\n\n${CHANGELOG_CONTENT}" > CHANGELOG.md
-    fi
-fi
-
-# Commit changes
-if [ "$DRY_RUN" = false ]; then
-    execute_cmd "git add package.json CHANGELOG.md"
-    execute_cmd "git commit -m \"bump version ($NEW_VERSION)\""
-    execute_cmd "git push origin $BUMP_BRANCH"
-    
-    echo "✨ Branch $BUMP_BRANCH created successfully!"
-    echo "🔍 Create a Pull Request to main branch to continue the release process"
-else
-    echo "Changes that would be made:"
-    echo "- Update version to $NEW_VERSION"
-    echo "- Update CHANGELOG.md"
-    echo "- Create and push branch $BUMP_BRANCH"
-fi
+Monitor the deployment at:
+https://github.com/rumbler/rumbler-portfolio/actions"

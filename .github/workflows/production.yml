@@ -1,73 +1,84 @@
-name: Production Deployment
+name: Production CD
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to deploy'
+        required: true
+        type: string
+  push:
+    tags:
+      - 'v*'
 
 permissions:
   packages: write      # Para push de imagens Docker
   contents: read      # Para checkout do código
-  actions: read       # Para ler o workflow anterior (CI)
-  checks: write       # Para atualizar o status do workflow
+  actions: read       # Para ler o workflow anterior
+  checks: write       # Para atualizar o status
   deployments: write  # Para criar deployments
 
-on:
-  workflow_call:
-    inputs:
-      version:
-        required: true
-        type: string
-    secrets:
-      nexus_username:
-        required: true
-      nexus_password:
-        required: true
-
 jobs:
-  deploy:
+  deploy-production:
     name: Deploy to Production
     runs-on: self-hosted
-    environment:
-      name: production
-      url: https://rumblersoppa.com.br
+    environment: production
     env:
       NODE_ENV: production
       PORT: 3000
-      DOCKER_CPU_LIMIT: 1.0
+      DOCKER_CPU_LIMIT: 1
       DOCKER_MEMORY_LIMIT: 512M
-      DOCKER_CPU_RESERVE: 0.5
-      DOCKER_MEMORY_RESERVE: 256M
+      DOCKER_CPU_RESERVE: 0.75
+      DOCKER_MEMORY_RESERVE: 384M
+    
     steps:
       - uses: actions/checkout@v4
       
+      - name: Get version from tag if not provided
+        if: github.event.inputs.version == ''
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Get RC tag
+        id: rc_tag
+        run: |
+          VERSION=${{ github.event.inputs.version || steps.get_version.outputs.version }}
+          RC_TAG="${VERSION%-*}-rc.$(git rev-parse --short HEAD)"
+          echo "rc_tag=${RC_TAG}" >> $GITHUB_OUTPUT
+      
       - name: Download build from Nexus
         env:
-          NEXUS_PASS: ${{ secrets.nexus_password }}
+          NEXUS_PASS: ${{ secrets.NEXUS_PASSWORD }}
+          NEXUS_URL: ${{ secrets.NEXUS_URL }}
+          NEXUS_REPO: ${{ secrets.NEXUS_REPOSITORY }}
+          RC_TAG: ${{ steps.rc_tag.outputs.rc_tag }}
         run: |
           mkdir -p build
-          curl -u "${{ secrets.nexus_username }}:$NEXUS_PASS" \
+          curl -u "${{ secrets.NEXUS_USERNAME }}:$NEXUS_PASS" \
             -o build.zip \
-            "https://pkg.rumblersoppa.com.br/repository/raw-hosted/rumbler-portfolio/${{ inputs.version }}/build.zip"
+            "${NEXUS_URL}/repository/${NEXUS_REPO}/${{ github.event.repository.name }}/${RC_TAG}/build.zip"
           unzip build.zip -d build/
-          rm build.zip
 
-      - name: Login to Nexus Docker Registry
-        uses: docker/login-action@v2
-        with:
-          registry: registry.rumblersoppa.com.br
-          username: ${{ secrets.nexus_username }}
-          password: ${{ secrets.nexus_password }}
-      
-      - name: Build and Push Production Image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: |
-            registry.rumblersoppa.com.br/portfolio:${{ inputs.version }}
-            registry.rumblersoppa.com.br/portfolio:latest
-
-      - name: Set Environment Variables
+      - name: Build and push Docker image
+        env:
+          REGISTRY_URL: ${{ secrets.REGISTRY_URL }}
         run: |
-          echo "IMAGE_TAG=${{ inputs.version }}" >> $GITHUB_ENV
+          VERSION=${{ github.event.inputs.version || steps.get_version.outputs.version }}
+          docker build -t ${REGISTRY_URL}/${{ github.event.repository.name }}:${VERSION} .
+          docker push ${REGISTRY_URL}/${{ github.event.repository.name }}:${VERSION}
+          
+          # Tag as latest
+          docker tag ${REGISTRY_URL}/${{ github.event.repository.name }}:${VERSION} ${REGISTRY_URL}/${{ github.event.repository.name }}:latest
+          docker push ${REGISTRY_URL}/${{ github.event.repository.name }}:latest
 
       - name: Deploy to Production
+        env:
+          IMAGE_TAG: ${{ github.event.inputs.version || steps.get_version.outputs.version }}
         run: |
-          docker compose down
-          docker compose up -d
+          # Pull new image first
+          docker compose -f docker-compose.yml -f docker-compose.production.yml pull
+          
+          # Rolling update - zero downtime
+          docker compose -f docker-compose.yml -f docker-compose.production.yml up -d --no-deps --build --force-recreate --remove-orphans

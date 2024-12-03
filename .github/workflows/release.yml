@@ -1,77 +1,97 @@
-name: Release Deployment
-
-# Workflow permissions for running after CI and handling Docker
-permissions:
-  packages: write      # Para push de imagens Docker
-  contents: read      # Para checkout do código
-  actions: read       # Para ler o workflow anterior (CI)
-  checks: write       # Para atualizar o status do workflow
-  deployments: write  # Para criar deployments
+name: Release CD
 
 on:
-  workflow_call:
+  workflow_dispatch:
     inputs:
       version:
-        description: 'Version for deployment (commit hash)'
+        description: 'Version to deploy'
         required: true
         type: string
-    secrets:
-      nexus_username:
-        required: true
-      nexus_password:
-        required: true
-  workflow_dispatch:  # Permite execução manual
+  pull_request:
+    types: [closed]
+    branches:
+      - "main"
+
+permissions:
+  packages: write      # Para push de imagens Docker
+  contents: write     # Para checkout do código e criar tags
+  actions: read       # Para ler o workflow anterior
+  checks: write       # Para atualizar o status
+  deployments: write  # Para criar deployments
 
 jobs:
   deploy-release:
     name: Deploy to Release
+    if: github.event.pull_request.merged == true && github.base_ref == 'main'
     runs-on: self-hosted
-    environment:
-      name: release
-      url: https://hml.rumblersoppa.com.br
+    environment: release
     env:
       NODE_ENV: release
       PORT: 3002
-      DOCKER_CPU_LIMIT: 0.5
-      DOCKER_MEMORY_LIMIT: 256M
-      DOCKER_CPU_RESERVE: 0.25
-      DOCKER_MEMORY_RESERVE: 128M
+      DOCKER_CPU_LIMIT: 0.75
+      DOCKER_MEMORY_LIMIT: 384M
+      DOCKER_CPU_RESERVE: 0.5
+      DOCKER_MEMORY_RESERVE: 256M
     
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       
-      - name: Download build from Nexus
+      - name: Create RC tag
+        id: create_tag
+        run: |
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          COMMIT_HASH=$(git rev-parse --short HEAD)
+          VERSION="${LAST_TAG%-*}-rc.${COMMIT_HASH}"
+          git tag $VERSION
+          git push origin $VERSION
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+      
+      - name: Build from development artifact
         env:
-          NEXUS_PASS: ${{ secrets.nexus_password }}
+          NEXUS_PASS: ${{ secrets.NEXUS_PASSWORD }}
+          NEXUS_URL: ${{ secrets.NEXUS_URL }}
+          NEXUS_REPO: ${{ secrets.NEXUS_REPOSITORY }}
+          DEV_VERSION: "pr-${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.sha }}"
         run: |
           mkdir -p build
-          curl -u "${{ secrets.nexus_username }}:$NEXUS_PASS" \
+          curl -u "${{ secrets.NEXUS_USERNAME }}:$NEXUS_PASS" \
             -o build.zip \
-            "https://pkg.rumblersoppa.com.br/repository/raw-hosted/rumbler-portfolio/${{ inputs.version }}/build.zip"
+            "${NEXUS_URL}/repository/${NEXUS_REPO}/${{ github.event.repository.name }}/${DEV_VERSION}/build.zip"
           unzip build.zip -d build/
-          rm build.zip
 
-      - name: Login to Nexus Docker Registry
-        uses: docker/login-action@v2
-        with:
-          registry: registry.rumblersoppa.com.br
-          username: ${{ secrets.nexus_username }}
-          password: ${{ secrets.nexus_password }}
-      
-      - name: Build and Push Release Image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: |
-            registry.rumblersoppa.com.br/portfolio:${{ inputs.version }}
-            registry.rumblersoppa.com.br/portfolio:release
-
-      - name: Set Environment Variables
+      - name: Upload RC build to Nexus
+        env:
+          NEXUS_PASS: ${{ secrets.NEXUS_PASSWORD }}
+          NEXUS_URL: ${{ secrets.NEXUS_URL }}
+          NEXUS_REPO: ${{ secrets.NEXUS_REPOSITORY }}
         run: |
-          echo "IMAGE_TAG=${{ inputs.version }}" >> $GITHUB_ENV
+          cd build
+          zip -r ../rc-build.zip .
+          cd ..
+          curl -u "${{ secrets.NEXUS_USERNAME }}:$NEXUS_PASS" \
+            --upload-file rc-build.zip \
+            "${NEXUS_URL}/repository/${NEXUS_REPO}/${{ github.event.repository.name }}/${{ steps.create_tag.outputs.version }}/build.zip"
+
+      - name: Build and push Docker image
+        env:
+          REGISTRY_URL: ${{ secrets.REGISTRY_URL }}
+        run: |
+          VERSION=${{ steps.create_tag.outputs.version }}
+          docker build -t ${REGISTRY_URL}/${{ github.event.repository.name }}:${VERSION} .
+          docker push ${REGISTRY_URL}/${{ github.event.repository.name }}:${VERSION}
+          
+          # Tag as release
+          docker tag ${REGISTRY_URL}/${{ github.event.repository.name }}:${VERSION} ${REGISTRY_URL}/${{ github.event.repository.name }}:release
+          docker push ${REGISTRY_URL}/${{ github.event.repository.name }}:release
 
       - name: Deploy to Release
+        env:
+          IMAGE_TAG: ${{ steps.create_tag.outputs.version }}
         run: |
-          docker compose down
-          docker compose up -d
+          # Pull new image first
+          docker compose -f docker-compose.yml -f docker-compose.release.yml pull
+          
+          # Rolling update - zero downtime
+          docker compose -f docker-compose.yml -f docker-compose.release.yml up -d --no-deps --build --force-recreate --remove-orphans

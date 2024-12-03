@@ -1,0 +1,11 @@
+services:
+  app:
+    container_name: rumbler-portfolio-${NODE_ENV:-development}-${IMAGE_TAG:-dev}
+    ports:
+      - "${PORT:-3001}:3000"
+    networks:
+      - portfolio-net-development
+
+networks:
+  portfolio-net-development:
+    driver: bridge
