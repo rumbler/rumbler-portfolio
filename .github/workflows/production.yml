@@ -1,62 +1,73 @@
 name: Production Deployment
 
+permissions:
+  packages: write      # Para push de imagens Docker
+  contents: read      # Para checkout do código
+  actions: read       # Para ler o workflow anterior (CI)
+  checks: write       # Para atualizar o status do workflow
+  deployments: write  # Para criar deployments
+
 on:
-  workflow_run:
-    workflows: ["Continuous Integration"]
-    types:
-      - completed
-    branches:
-      - main
-  push:
-    branches:
-      - main
-    tags:
-      - 'v*'
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+    secrets:
+      nexus_username:
+        required: true
+      nexus_password:
+        required: true
 
 jobs:
   deploy-production:
+    name: Deploy to Production
     runs-on: self-hosted
-    if: github.event.workflow_run.conclusion == 'success'
+    environment:
+      name: production
+      url: https://rumblersoppa.com.br
+    env:
+      NODE_ENV: production
+      PORT: 3000
+      DOCKER_CPU_LIMIT: 1.0
+      DOCKER_MEMORY_LIMIT: 512M
+      DOCKER_CPU_RESERVE: 0.5
+      DOCKER_MEMORY_RESERVE: 256M
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
-      - name: Download build artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: build
-          path: dist/
-      
-      - name: Get tag version
-        id: get_version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20.10.0
-          
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-          
-      - name: Build Production Image
+      - name: Download build from Nexus
+        env:
+          NEXUS_PASS: ${{ secrets.nexus_password }}
         run: |
-          docker build \
-            --build-arg NODE_ENV=production \
-            -t portfolio:${{ steps.get_version.outputs.VERSION }} \
-            -t portfolio:latest .
+          mkdir -p build
+          curl -u "${{ secrets.nexus_username }}:$NEXUS_PASS" \
+            -o build.zip \
+            "https://pkg.rumblersoppa.com.br/repository/raw-hosted/rumbler-portfolio/${{ inputs.version }}/build.zip"
+          unzip build.zip -d build/
+          rm build.zip
+
+      - name: Login to Nexus Docker Registry
+        uses: docker/login-action@v2
+        with:
+          registry: registry.rumblersoppa.com.br
+          username: ${{ secrets.nexus_username }}
+          password: ${{ secrets.nexus_password }}
       
+      - name: Build and Push Production Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            registry.rumblersoppa.com.br/portfolio:${{ inputs.version }}
+            registry.rumblersoppa.com.br/portfolio:latest
+
+      - name: Set Environment Variables
+        run: |
+          echo "IMAGE_TAG=${{ inputs.version }}" >> $GITHUB_ENV
+
       - name: Deploy to Production
         run: |
-          docker-compose down
-          NODE_ENV=production \
-          DOCKER_CPU_LIMIT=1 \
-          DOCKER_MEMORY_LIMIT=512M \
-          DOCKER_CPU_RESERVE=0.5 \
-          DOCKER_MEMORY_RESERVE=256M \
-          PORT=3000 \
-          docker-compose up -d
-          
-      - name: Clean old images
-        run: docker image prune -f --filter "until=24h"
+          docker compose down
+          docker compose up -d
