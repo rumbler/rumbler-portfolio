@@ -2,7 +2,7 @@ name: Continuous Integration
 
 on:
   push:
-    branches: ["development"]  # Main is protected, only accepts PRs
+    branches: ["development", "main"]  # Main needs push trigger for RC tags
     tags:
       - 'v*'
   pull_request:
