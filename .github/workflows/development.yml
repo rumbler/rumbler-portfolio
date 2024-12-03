@@ -12,16 +12,16 @@ on:
       - "development"
 
 permissions:
-  packages: write      # Para push de imagens Docker
-  contents: read      # Para checkout do código
-  actions: read       # Para ler o workflow anterior
-  checks: write       # Para atualizar o status
-  deployments: write  # Para criar deployments
+  packages: write
+  contents: read
+  actions: read
+  checks: write  
+  deployments: write
 
 jobs:
   deploy-development:
     name: Deploy to Development
-    if: github.event.push.branch == 'development'
+    if: github.ref == 'refs/heads/development'
     runs-on: self-hosted
     environment: development
     env:
