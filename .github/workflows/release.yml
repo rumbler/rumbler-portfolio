@@ -7,13 +7,14 @@ on:
         description: 'Version to deploy'
         required: true
         type: string
-  push:
+  pull_request_target:
+    types: [closed]
     branches:
       - "main"
 
 permissions:
   packages: write
-  contents: write
+  contents: read
   actions: read
   checks: write
   deployments: write
@@ -21,7 +22,7 @@ permissions:
 jobs:
   deploy-release:
     name: Deploy to Release
-    if: github.ref == 'refs/heads/main'
+    if: github.event.pull_request.merged == true
     runs-on: self-hosted
     environment: release
     env:
@@ -37,57 +38,48 @@ jobs:
         with:
           fetch-depth: 0
       
-      - name: Create RC tag
-        id: create_tag
+      - name: Get version from commit
+        if: github.event.inputs.version == ''
+        id: get_version
         run: |
-          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-          COMMIT_HASH=$(git rev-parse --short HEAD)
-          VERSION="${LAST_TAG%-*}-rc.${COMMIT_HASH}"
-          git tag $VERSION
-          git push origin $VERSION
+          COMMIT_SHA=${{ github.sha }}
+          VERSION="${COMMIT_SHA:0:7}"
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
-      
-      - name: Build from development artifact
+
+      - name: Create Release Tag
+        run: |
+          VERSION=${{ github.event.inputs.version || steps.get_version.outputs.version }}
+          git tag "v${VERSION}"
+          git push origin "v${VERSION}"
+
+      - name: Download build from Nexus
         env:
           NEXUS_PASS: ${{ secrets.NEXUS_PASSWORD }}
           NEXUS_URL: ${{ secrets.NEXUS_URL }}
           NEXUS_REPO: ${{ secrets.NEXUS_REPOSITORY }}
-          DEV_VERSION: "pr-${{ github.event.pull_request.number }}-${{ github.event.pull_request.head.sha }}"
         run: |
           mkdir -p build
+          VERSION=${{ github.event.inputs.version || steps.get_version.outputs.version }}
           curl -u "${{ secrets.NEXUS_USERNAME }}:$NEXUS_PASS" \
             -o build.zip \
-            "${NEXUS_URL}/repository/${NEXUS_REPO}/${{ github.event.repository.name }}/${DEV_VERSION}/build.zip"
+            "${NEXUS_URL}/repository/${NEXUS_REPO}/${{ github.event.repository.name }}/release/${VERSION}.zip"
           unzip build.zip -d build/
-
-      - name: Upload RC build to Nexus
-        env:
-          NEXUS_PASS: ${{ secrets.NEXUS_PASSWORD }}
-          NEXUS_URL: ${{ secrets.NEXUS_URL }}
-          NEXUS_REPO: ${{ secrets.NEXUS_REPOSITORY }}
-        run: |
-          cd build
-          zip -r ../rc-build.zip .
-          cd ..
-          curl -u "${{ secrets.NEXUS_USERNAME }}:$NEXUS_PASS" \
-            --upload-file rc-build.zip \
-            "${NEXUS_URL}/repository/${NEXUS_REPO}/${{ github.event.repository.name }}/${{ steps.create_tag.outputs.version }}/build.zip"
 
       - name: Build and push Docker image
         env:
           REGISTRY_URL: ${{ secrets.REGISTRY_URL }}
         run: |
-          VERSION=${{ steps.create_tag.outputs.version }}
-          docker build -t ${REGISTRY_URL}/${{ github.event.repository.name }}:${VERSION} .
-          docker push ${REGISTRY_URL}/${{ github.event.repository.name }}:${VERSION}
+          VERSION=${{ github.event.inputs.version || steps.get_version.outputs.version }}
+          docker build -t ${REGISTRY_URL}/${{ github.event.repository.name }}:${VERSION}-rc .
+          docker push ${REGISTRY_URL}/${{ github.event.repository.name }}:${VERSION}-rc
           
           # Tag as release
-          docker tag ${REGISTRY_URL}/${{ github.event.repository.name }}:${VERSION} ${REGISTRY_URL}/${{ github.event.repository.name }}:release
+          docker tag ${REGISTRY_URL}/${{ github.event.repository.name }}:${VERSION}-rc ${REGISTRY_URL}/${{ github.event.repository.name }}:release
           docker push ${REGISTRY_URL}/${{ github.event.repository.name }}:release
 
       - name: Deploy to Release
         env:
-          IMAGE_TAG: ${{ steps.create_tag.outputs.version }}
+          IMAGE_TAG: ${{ github.event.inputs.version || steps.get_version.outputs.version }}
         run: |
           # Pull new image first
           docker compose -f docker-compose.yml -f docker-compose.release.yml pull
