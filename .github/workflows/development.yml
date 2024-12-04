@@ -1,12 +1,6 @@
 name: Development CD
 
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version to deploy'
-        required: true
-        type: string
   pull_request_target:
     types: [closed]
     branches:
