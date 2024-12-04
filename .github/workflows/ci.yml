@@ -1,6 +1,8 @@
 name: Continuous Integration
 
 on:
+  # CI sem upload: push em branches de feature e PRs abertas
+  # CI com upload: RC tags e Production tags
   push:
     branches: 
       - "feat/**"
@@ -11,11 +13,15 @@ on:
       - "test/**"
       - "chore/**"
     tags:
-      - 'v*'  
+      - 'v*-rc.*'  # RC tags (após merge em main). Exemplo: v1.0.0-rc.1
+      - 'v[0-9]*.[0-9]*.[0-9]*'  # Production tags. Exemplo: v1.0.0
+
   pull_request:
     branches: 
       - "development"
       - "main"
+
+  # CI com upload: apenas quando PR é merged
   pull_request_target:
     types: [closed]
     branches:
@@ -25,10 +31,7 @@ on:
 jobs:
   build-and-test:
     runs-on: self-hosted
-    outputs:
-      version: ${{ steps.version.outputs.version }}
-      environment: ${{ steps.version.outputs.environment }}
-
+    
     steps:
     - uses: actions/checkout@v4
       with:
@@ -52,49 +55,56 @@ jobs:
     - name: Build
       run: pnpm build
 
+    # Criar zip e fazer upload apenas se for PR merged ou tag
+    - name: Create build artifact
+      if: |
+        (github.event_name == 'pull_request_target' && github.event.pull_request.merged == true) ||
+        (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
+        (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v*-rc.*')) ||
+        (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v[0-9]*.[0-9]*.[0-9]*'))
+      run: |
+        cd build
+        zip -r ../build.zip .
+        cd ..
+
     - name: Set Version and Environment
       id: version
+      if: |
+        (github.event_name == 'pull_request_target' && github.event.pull_request.merged == true) ||
+        (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
+        (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v*-rc.*')) ||
+        (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v[0-9]*.[0-9]*.[0-9]*'))
       run: |
         if [[ $GITHUB_EVENT_NAME == 'pull_request_target' && "${{ github.event.pull_request.merged }}" == 'true' ]]; then
-          # PR foi merged
           if [[ $GITHUB_BASE_REF == 'development' ]]; then
-            # PR merged na development
             VERSION=$(git rev-parse --short HEAD)
             ENVIRONMENT="development"
           elif [[ $GITHUB_BASE_REF == 'main' ]]; then
-            # PR merged na main -> release
             VERSION="v$(git rev-parse --short HEAD)"
             ENVIRONMENT="release"
           fi
         elif [[ $GITHUB_EVENT_NAME == 'push' && $GITHUB_REF == refs/tags/* ]]; then
-          # Push de tag -> production
           VERSION=${GITHUB_REF#refs/tags/}
-          ENVIRONMENT="production"
-        else
-          # Outros casos - não fazemos upload
-          VERSION=$(git rev-parse --short HEAD)
-          ENVIRONMENT="none"
+          if [[ $VERSION == *-rc.* ]]; then
+            ENVIRONMENT="release-candidate"
+          else
+            ENVIRONMENT="production"
+          fi
         fi
         echo "version=$VERSION" >> $GITHUB_OUTPUT
         echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
 
-    # Upload to Nexus apenas nos casos específicos
-    - name: Create and Upload Artifact
+    - name: Upload to Nexus
       if: |
-        (github.event_name == 'pull_request_target' && github.event.pull_request.merged == true && github.base_ref == 'development') ||
-        (github.event_name == 'pull_request_target' && github.event.pull_request.merged == true && github.base_ref == 'main') ||
-        (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v'))
+        (github.event_name == 'pull_request_target' && github.event.pull_request.merged == true) ||
+        (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
+        (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v*-rc.*')) ||
+        (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v[0-9]*.[0-9]*.[0-9]*'))
       env:
         NEXUS_PASS: ${{ secrets.NEXUS_PASSWORD }}
         NEXUS_URL: ${{ secrets.NEXUS_URL }}
         NEXUS_REPO: ${{ secrets.NEXUS_REPOSITORY }}
       run: |
-        # Create zip
-        cd build
-        zip -r ../build.zip .
-        cd ..
-        
-        # Upload to Nexus
         curl -u "${{ secrets.NEXUS_USERNAME }}:$NEXUS_PASS" \
           --upload-file build.zip \
           "${NEXUS_URL}/repository/${NEXUS_REPO}/${{ github.event.repository.name }}/${{ steps.version.outputs.environment }}/${{ steps.version.outputs.version }}.zip"
