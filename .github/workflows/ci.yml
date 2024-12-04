@@ -55,7 +55,7 @@ jobs:
     - name: Set Version and Environment
       id: version
       run: |
-        if [[ $GITHUB_EVENT_NAME == 'pull_request_target' && ${{ github.event.pull_request.merged }} == true ]]; then
+        if [[ $GITHUB_EVENT_NAME == 'pull_request_target' && "${{ github.event.pull_request.merged }}" == 'true' ]]; then
           # PR foi merged
           if [[ $GITHUB_BASE_REF == 'development' ]]; then
             # PR merged na development
