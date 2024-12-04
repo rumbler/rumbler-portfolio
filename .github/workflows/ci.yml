@@ -5,6 +5,7 @@ on:
   # CI com upload: RC tags e Production tags
   push:
     branches: 
+      - "development"
       - "feat/**"
       - "fix/**"
       - "docs/**"
