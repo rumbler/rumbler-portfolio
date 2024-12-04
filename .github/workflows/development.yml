@@ -1,8 +1,10 @@
 name: Development CD
 
 on:
-  pull_request_target:
-    types: [closed]
+  workflow_run:
+    workflows: ["Continuous Integration"]
+    types:
+      - completed
     branches:
       - "development"
 
@@ -16,7 +18,9 @@ permissions:
 jobs:
   deploy-development:
     name: Deploy to Development
-    if: github.event.pull_request.merged == true
+    if: |
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'development'
     runs-on: self-hosted
     environment: development
     env:
