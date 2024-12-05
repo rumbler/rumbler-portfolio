@@ -5,8 +5,6 @@ on:
     workflows: ["Continuous Integration"]
     types:
       - completed
-    branches:
-      - "development"
 
 permissions:
   packages: write
@@ -20,8 +18,8 @@ jobs:
     name: Deploy to Development
     if: |
       github.event.workflow_run.conclusion == 'success' &&
-      (github.event.workflow_run.base_repository.full_name == github.repository) &&
-      contains(fromJson('["development", "main"]'), github.event.workflow_run.base_branch)
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.ref == 'refs/heads/development'
     runs-on: self-hosted
     environment: development
     env:
