@@ -1,6 +1,6 @@
 services:
   app:
-    image: registry.rumblersoppa.com.br/portfolio:${IMAGE_TAG:-dev}
+    image: registry.rumblersoppa.com.br/rumbler-portfolio:${IMAGE_TAG:-dev}
     restart: unless-stopped
     deploy:
       resources:
