@@ -4,13 +4,6 @@ on:
   push:
     branches: 
       - "development"
-      - "feat/**"
-      - "fix/**"
-      - "docs/**"
-      - "style/**"
-      - "refactor/**"
-      - "test/**"
-      - "chore/**"
     tags:
       - 'v*-rc.*'
       - 'v[0-9]*.[0-9]*.[0-9]*'
@@ -18,13 +11,6 @@ on:
   pull_request:
     branches: 
       - "development"
-      - "main"
-
-  pull_request_target:
-    types: [closed]
-    branches:
-      - "development"
-      - "main"
 
 jobs:
   build-and-test:
