@@ -54,7 +54,12 @@ jobs:
       - name: Build and push Docker image
         env:
           REGISTRY_URL: ${{ secrets.REGISTRY_URL }}
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASS: ${{ secrets.NEXUS_PASSWORD }}
         run: |
+          # Login no Docker Registry
+          echo "$NEXUS_PASS" | docker login $REGISTRY_URL -u "$NEXUS_USERNAME" --password-stdin
+          
           VERSION=${{ github.event.inputs.version || steps.get_version.outputs.version }}
           docker build -t ${REGISTRY_URL}/${{ github.event.repository.name }}:${VERSION} .
           docker push ${REGISTRY_URL}/${{ github.event.repository.name }}:${VERSION}
@@ -66,7 +71,13 @@ jobs:
       - name: Deploy to Development
         env:
           IMAGE_TAG: ${{ github.event.inputs.version || steps.get_version.outputs.version }}
+          REGISTRY_URL: ${{ secrets.REGISTRY_URL }}
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASS: ${{ secrets.NEXUS_PASSWORD }}
         run: |
+          # Login no Docker Registry
+          echo "$NEXUS_PASS" | docker login $REGISTRY_URL -u "$NEXUS_USERNAME" --password-stdin
+          
           # Pull new image first
           docker compose -f docker-compose.yml -f docker-compose.development.yml pull
           
