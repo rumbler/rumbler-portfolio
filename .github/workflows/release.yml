@@ -1,14 +1,7 @@
 name: Release CD
 
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version to deploy'
-        required: true
-        type: string
-  pull_request_target:
-    types: [closed]
+  push:
     branches:
       - "main"
 
@@ -22,7 +15,7 @@ permissions:
 jobs:
   deploy-release:
     name: Deploy to Release
-    if: github.event.pull_request.merged == true
+    if: github.ref == 'refs/heads/main'
     runs-on: self-hosted
     environment: release
     env:
@@ -68,14 +61,19 @@ jobs:
       - name: Build and push Docker image
         env:
           REGISTRY_URL: ${{ secrets.REGISTRY_URL }}
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASS: ${{ secrets.NEXUS_PASSWORD }}
         run: |
+          # Login no Docker Registry
+          echo "$NEXUS_PASS" | docker login $REGISTRY_URL -u "$NEXUS_USERNAME" --password-stdin
+          
           VERSION=${{ github.event.inputs.version || steps.get_version.outputs.version }}
-          docker build -t ${REGISTRY_URL}/${{ github.event.repository.name }}:${VERSION}-rc .
-          docker push ${REGISTRY_URL}/${{ github.event.repository.name }}:${VERSION}-rc
+          docker build -t ${REGISTRY_URL}/rumbler-portfolio:${VERSION}-rc .
+          docker push ${REGISTRY_URL}/rumbler-portfolio:${VERSION}-rc
           
           # Tag as release
-          docker tag ${REGISTRY_URL}/${{ github.event.repository.name }}:${VERSION}-rc ${REGISTRY_URL}/${{ github.event.repository.name }}:release
-          docker push ${REGISTRY_URL}/${{ github.event.repository.name }}:release
+          docker tag ${REGISTRY_URL}/rumbler-portfolio:${VERSION}-rc ${REGISTRY_URL}/rumbler-portfolio:release
+          docker push ${REGISTRY_URL}/rumbler-portfolio:release
 
       - name: Deploy to Release
         env:
