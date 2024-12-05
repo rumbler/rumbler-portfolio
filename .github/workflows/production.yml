@@ -9,7 +9,7 @@ on:
         type: string
   push:
     tags:
-      - 'v*'
+      - 'v[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'
 
 permissions:
   packages: write
@@ -60,19 +60,30 @@ jobs:
       - name: Build and push Docker image
         env:
           REGISTRY_URL: ${{ secrets.REGISTRY_URL }}
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASS: ${{ secrets.NEXUS_PASSWORD }}
         run: |
+          # Login no Docker Registry
+          echo "$NEXUS_PASS" | docker login $REGISTRY_URL -u "$NEXUS_USERNAME" --password-stdin
+          
           VERSION=${{ github.event.inputs.version || steps.get_version.outputs.version }}
-          docker build -t ${REGISTRY_URL}/${{ github.event.repository.name }}:${VERSION} .
-          docker push ${REGISTRY_URL}/${{ github.event.repository.name }}:${VERSION}
+          docker build -t ${REGISTRY_URL}/rumbler-portfolio:${VERSION} .
+          docker push ${REGISTRY_URL}/rumbler-portfolio:${VERSION}
           
           # Tag as latest
-          docker tag ${REGISTRY_URL}/${{ github.event.repository.name }}:${VERSION} ${REGISTRY_URL}/${{ github.event.repository.name }}:latest
-          docker push ${REGISTRY_URL}/${{ github.event.repository.name }}:latest
+          docker tag ${REGISTRY_URL}/rumbler-portfolio:${VERSION} ${REGISTRY_URL}/rumbler-portfolio:latest
+          docker push ${REGISTRY_URL}/rumbler-portfolio:latest
 
       - name: Deploy to Production
         env:
           IMAGE_TAG: ${{ github.event.inputs.version || steps.get_version.outputs.version }}
+          REGISTRY_URL: ${{ secrets.REGISTRY_URL }}
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASS: ${{ secrets.NEXUS_PASSWORD }}
         run: |
+          # Login no Docker Registry
+          echo "$NEXUS_PASS" | docker login $REGISTRY_URL -u "$NEXUS_USERNAME" --password-stdin
+          
           # Pull new image first
           docker compose -f docker-compose.yml -f docker-compose.production.yml pull
           
