@@ -1,6 +1,8 @@
+version: '3.8'
+
 services:
   app:
-    image: registry.rumblersoppa.com.br/portfolio:${IMAGE_TAG:-latest}
+    image: ${REGISTRY_URL}/rumbler-portfolio:${IMAGE_TAG:-latest}
     container_name: rumbler-portfolio-${NODE_ENV:-production}-${IMAGE_TAG:-latest}
     restart: unless-stopped
     ports:
