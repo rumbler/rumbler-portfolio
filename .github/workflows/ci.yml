@@ -4,6 +4,7 @@ on:
   push:
     branches: 
       - "development"
+      - "main"
     tags:
       - 'v*-rc.*'
       - 'v[0-9]*.[0-9]*.[0-9]*'
@@ -11,6 +12,7 @@ on:
   pull_request:
     branches: 
       - "development"
+      - "main"
 
 jobs:
   build-and-test:
