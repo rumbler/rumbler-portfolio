@@ -30,20 +30,15 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
-      - name: Get version from commit
-        if: github.event.inputs.version == ''
+
+      - name: Generate release version
         id: get_version
         run: |
+          # Pega o SHA do commit
           COMMIT_SHA=${{ github.sha }}
-          VERSION="${COMMIT_SHA:0:7}"
+          # Cria uma tag temporária no formato rc-{7 primeiros caracteres do SHA}
+          VERSION="rc-${COMMIT_SHA:0:7}"
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
-
-      - name: Create Release Tag
-        run: |
-          VERSION=${{ github.event.inputs.version || steps.get_version.outputs.version }}
-          git tag "v${VERSION}"
-          git push origin "v${VERSION}"
 
       - name: Download build from Nexus
         env:
@@ -52,7 +47,7 @@ jobs:
           NEXUS_REPO: ${{ secrets.NEXUS_REPOSITORY }}
         run: |
           mkdir -p build
-          VERSION=${{ github.event.inputs.version || steps.get_version.outputs.version }}
+          VERSION=${{ steps.get_version.outputs.version }}
           curl -u "${{ secrets.NEXUS_USERNAME }}:$NEXUS_PASS" \
             -o build.zip \
             "${NEXUS_URL}/repository/${NEXUS_REPO}/${{ github.event.repository.name }}/release/${VERSION}.zip"
@@ -67,18 +62,24 @@ jobs:
           # Login no Docker Registry
           echo "$NEXUS_PASS" | docker login $REGISTRY_URL -u "$NEXUS_USERNAME" --password-stdin
           
-          VERSION=${{ github.event.inputs.version || steps.get_version.outputs.version }}
-          docker build -t ${REGISTRY_URL}/rumbler-portfolio:${VERSION}-rc .
-          docker push ${REGISTRY_URL}/rumbler-portfolio:${VERSION}-rc
+          VERSION=${{ steps.get_version.outputs.version }}
+          docker build -t ${REGISTRY_URL}/rumbler-portfolio:${VERSION} .
+          docker push ${REGISTRY_URL}/rumbler-portfolio:${VERSION}
           
           # Tag as release
-          docker tag ${REGISTRY_URL}/rumbler-portfolio:${VERSION}-rc ${REGISTRY_URL}/rumbler-portfolio:release
+          docker tag ${REGISTRY_URL}/rumbler-portfolio:${VERSION} ${REGISTRY_URL}/rumbler-portfolio:release
           docker push ${REGISTRY_URL}/rumbler-portfolio:release
 
       - name: Deploy to Release
         env:
-          IMAGE_TAG: ${{ github.event.inputs.version || steps.get_version.outputs.version }}
+          IMAGE_TAG: ${{ steps.get_version.outputs.version }}
+          REGISTRY_URL: ${{ secrets.REGISTRY_URL }}
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASS: ${{ secrets.NEXUS_PASSWORD }}
         run: |
+          # Login no Docker Registry
+          echo "$NEXUS_PASS" | docker login $REGISTRY_URL -u "$NEXUS_USERNAME" --password-stdin
+          
           # Pull new image first
           docker compose -f docker-compose.yml -f docker-compose.release.yml pull
           
