@@ -1,15 +1,6 @@
 name: Development CD
 
 on:
-<<<<<<< HEAD
-=======
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version to deploy'
-        required: true
-        type: string
->>>>>>> 806f52d (fix: update CD workflows to run on push)
   push:
     branches:
       - "development"
@@ -24,11 +15,7 @@ permissions:
 jobs:
   deploy-development:
     name: Deploy to Development
-<<<<<<< HEAD
     if: github.ref == 'refs/heads/development'
-=======
-    if: github.event.push.branch == 'development'
->>>>>>> 806f52d (fix: update CD workflows to run on push)
     runs-on: self-hosted
     environment: development
     env:
@@ -48,11 +35,7 @@ jobs:
         id: get_version
         run: |
           COMMIT_SHA=${{ github.sha }}
-<<<<<<< HEAD
           VERSION="${COMMIT_SHA:0:7}"
-=======
-          VERSION="commit-${COMMIT_SHA:0:7}"
->>>>>>> 806f52d (fix: update CD workflows to run on push)
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
       
       - name: Download build from Nexus
