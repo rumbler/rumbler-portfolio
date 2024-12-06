@@ -1,15 +1,60 @@
+version: '3.8'
+
 services:
-  app:
-    image: registry.rumblersoppa.com.br/rumbler-portfolio:${IMAGE_TAG:-dev}
+  portfolio-development:
+    image: ${REGISTRY_URL}/rumbler-portfolio:${DEV_IMAGE_TAG:-development}
+    container_name: rumbler-portfolio-development-${DEV_IMAGE_TAG:-dev}
     restart: unless-stopped
+    ports:
+      - "${DEV_PORT:-3001}:3000"
+    environment:
+      - NODE_ENV=development
     deploy:
       resources:
         limits:
-          cpus: '${DOCKER_CPU_LIMIT:-1}'
-          memory: ${DOCKER_MEMORY_LIMIT:-512M}
+          cpus: '${DEV_CPU_LIMIT:-0.5}'
+          memory: ${DEV_MEMORY_LIMIT:-256M}
         reservations:
-          cpus: '${DOCKER_CPU_RESERVE:-0.5}'
-          memory: ${DOCKER_MEMORY_RESERVE:-256M}
+          cpus: '${DEV_CPU_RESERVE:-0.25}'
+          memory: ${DEV_MEMORY_RESERVE:-128M}
+    networks:
+      - portfolio-net
+
+  portfolio-release:
+    image: ${REGISTRY_URL}/rumbler-portfolio:${RELEASE_IMAGE_TAG:-release}
+    container_name: rumbler-portfolio-release-${RELEASE_IMAGE_TAG:-release}
+    restart: unless-stopped
+    ports:
+      - "${RELEASE_PORT:-3002}:3000"
+    environment:
+      - NODE_ENV=release
+    deploy:
+      resources:
+        limits:
+          cpus: '${RELEASE_CPU_LIMIT:-0.75}'
+          memory: ${RELEASE_MEMORY_LIMIT:-384M}
+        reservations:
+          cpus: '${RELEASE_CPU_RESERVE:-0.5}'
+          memory: ${RELEASE_MEMORY_RESERVE:-256M}
+    networks:
+      - portfolio-net
+
+  portfolio-production:
+    image: ${REGISTRY_URL}/rumbler-portfolio:${PROD_IMAGE_TAG:-latest}
+    container_name: rumbler-portfolio-production-${PROD_IMAGE_TAG:-latest}
+    restart: unless-stopped
+    ports:
+      - "${PROD_PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=production
+    deploy:
+      resources:
+        limits:
+          cpus: '${PROD_CPU_LIMIT:-1.0}'
+          memory: ${PROD_MEMORY_LIMIT:-512M}
+        reservations:
+          cpus: '${PROD_CPU_RESERVE:-0.75}'
+          memory: ${PROD_MEMORY_RESERVE:-384M}
     networks:
       - portfolio-net
 

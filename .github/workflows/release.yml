@@ -72,16 +72,21 @@ jobs:
 
       - name: Deploy to Release
         env:
-          IMAGE_TAG: ${{ steps.get_version.outputs.version }}
+          RELEASE_IMAGE_TAG: ${{ steps.get_version.outputs.version }}
           REGISTRY_URL: ${{ secrets.REGISTRY_URL }}
           NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           NEXUS_PASS: ${{ secrets.NEXUS_PASSWORD }}
+          RELEASE_PORT: 3002
+          RELEASE_CPU_LIMIT: 0.75
+          RELEASE_MEMORY_LIMIT: 384M
+          RELEASE_CPU_RESERVE: 0.5
+          RELEASE_MEMORY_RESERVE: 256M
         run: |
           # Login no Docker Registry
           echo "$NEXUS_PASS" | docker login $REGISTRY_URL -u "$NEXUS_USERNAME" --password-stdin
           
           # Pull new image first
-          docker compose -f docker-compose.yml -f docker-compose.release.yml pull
+          docker compose pull portfolio-release
           
           # Rolling update - zero downtime
-          docker compose -f docker-compose.yml -f docker-compose.release.yml up -d --no-deps --build --force-recreate --remove-orphans
+          docker compose up -d --no-deps --build --force-recreate --remove-orphans portfolio-release
