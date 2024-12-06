@@ -90,26 +90,56 @@ get_versions() {
     esac
 }
 
+# Get commits since last version
+get_commits_by_type() {
+    local commit_type=$1
+    local pattern=$2
+    git log --pretty=format:"%s" $(git describe --tags --abbrev=0 2>/dev/null || git rev-list --max-parents=0 HEAD)..HEAD | grep "^$pattern" || true
+}
+
 # Generate changelog entry
 generate_changelog() {
-    echo "# Changelog
+    local version=$1
+    local features=$(get_commits_by_type "feat" "feat:")
+    local fixes=$(get_commits_by_type "fix" "fix:")
+    local docs=$(get_commits_by_type "docs" "docs:")
+    local others=$(git log --pretty=format:"%s" $(git describe --tags --abbrev=0 2>/dev/null || git rev-list --max-parents=0 HEAD)..HEAD | grep -vE "^(feat:|fix:|docs:)" || true)
 
-## [$1] - $(date +%Y-%m-%d)
+    # Only include sections that have commits
+    echo "## [$version] - $(date +%Y-%m-%d)"
+    echo
 
-### Added
-- [Feature] Add your new features here
-- [Enhancement] List your enhancements
+    if [ ! -z "$features" ]; then
+        echo "### Added"
+        echo "$features" | while read -r line; do
+            echo "- $line"
+        done
+        echo
+    fi
 
-### Fixed
-- List your fixes here
+    if [ ! -z "$fixes" ]; then
+        echo "### Fixed"
+        echo "$fixes" | while read -r line; do
+            echo "- $line"
+        done
+        echo
+    fi
 
-### Documentation
-- List documentation changes here
+    if [ ! -z "$docs" ]; then
+        echo "### Documentation"
+        echo "$docs" | while read -r line; do
+            echo "- $line"
+        done
+        echo
+    fi
 
-### Other Changes
-- List other changes here
-
-"
+    if [ ! -z "$others" ]; then
+        echo "### Other Changes"
+        echo "$others" | while read -r line; do
+            echo "- $line"
+        done
+        echo
+    fi
 }
 
 # Function to prepare version in development
