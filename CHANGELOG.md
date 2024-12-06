@@ -118,3 +118,17 @@
 ### Chore
 - Added author and description to package.json
 - Configured initial project setup
+[0;36m## [1.1.0] - 2024-12-06
+
+### Added
+- [Feature] Add your new features here
+- [Enhancement] List your enhancements
+
+### Changed
+- [Update] List your updates here
+- [Refactor] List your refactors
+
+### Fixed
+- [Fix] List your bug fixes here
+- [Security] List your security fixes[0m
+
