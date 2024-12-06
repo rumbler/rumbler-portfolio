@@ -1,4 +1,11 @@
 
+## [1.1.7] - 2024-12-06
+
+### Fixed
+- fix: resolve conflict
+- fix: use --follow-tags when pushing version tags (#50)
+
+
 ## [1.1.6] - 2024-12-06
 
 ### Added
