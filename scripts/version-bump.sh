@@ -92,77 +92,49 @@ get_versions() {
 
 # Generate changelog entry
 generate_changelog() {
-    echo -e "${CYAN}## [$1] - $(date +%Y-%m-%d)
+    echo "# Changelog
+
+## [$1] - $(date +%Y-%m-%d)
 
 ### Added
 - [Feature] Add your new features here
 - [Enhancement] List your enhancements
 
-### Changed
-- [Update] List your updates here
-- [Refactor] List your refactors
-
 ### Fixed
-- [Fix] List your bug fixes here
-- [Security] List your security fixes${NC}
+- List your fixes here
+
+### Documentation
+- List documentation changes here
+
+### Other Changes
+- List other changes here
+
 "
 }
 
 # Function to prepare version in development
 prepare_version() {
-    if [ "$DRY_RUN" = true ]; then
-        echo -e "${YELLOW}$BOX_TOP"
-        center_text "DEVELOPMENT BRANCH PREVIEW"
-        echo -e "$BOX_BOTTOM${NC}"
-    else
-        echo -e "${GREEN}$BOX_TOP"
-        center_text "PREPARING NEW VERSION"
-        echo -e "$BOX_BOTTOM${NC}"
-    fi
-
-    echo -e "
-${BOLD}Current State:${NC}
-   → Branch: ${CYAN}development${NC}
-   → Current Version: ${YELLOW}$CURRENT_VERSION${NC}
-   → Target Version: ${GREEN}$NEW_VERSION${NC}
-
-${BOLD}The following changes will be made:${NC}
-"
-    echo -e "${BOLD}1. Version Files${NC}"
-    echo -e "   → Updating VERSION and package.json to ${GREEN}$NEW_VERSION${NC}"
-    execute_cmd "echo \"$NEW_VERSION\" > VERSION"
-    execute_cmd "pnpm pkg set version=$NEW_VERSION"
+    get_versions
     
-    echo -e "
-${BOLD}2. CHANGELOG.md${NC}"
-    if [ "$DRY_RUN" = true ]; then
-        echo -e "   → Would add new entry to CHANGELOG.md:
-${YELLOW}$BOX_DIVIDER${NC}"
-        generate_changelog "$NEW_VERSION"
-        echo -e "${YELLOW}$BOX_DIVIDER${NC}"
-    else
-        generate_changelog "$NEW_VERSION" >> CHANGELOG.md
-        echo -e "${GREEN}   → Added new entry for version $NEW_VERSION${NC}"
-    fi
+    echo -e "$BOX_TOP"
+    center_text "Preparing Version $NEW_VERSION"
+    echo "$BOX_DIVIDER"
+    center_text "Current Version: $CURRENT_VERSION"
+    center_text "New Version: $NEW_VERSION"
+    echo "$BOX_BOTTOM"
 
-    echo -e "
-${BOLD}3. Git Changes${NC}"
-    execute_cmd "git add VERSION package.json CHANGELOG.md"
-    execute_cmd "git commit -m \"chore: bump version $NEW_VERSION\""
+    # Update VERSION file
+    execute_cmd "echo $NEW_VERSION > VERSION"
     
-    if [ "$DRY_RUN" = true ]; then
-        echo -e "
-${YELLOW}$BOX_TOP"
-        center_text "DRY RUN COMPLETED"
-        center_text "No actual changes have been made"
-        echo -e "$BOX_BOTTOM${NC}"
-    else
-        echo -e "
-${GREEN}$BOX_TOP"
-        center_text "VERSION PREPARED"
-        center_text "All changes have been committed"
-        echo -e "$BOX_BOTTOM${NC}"
-    fi
+    # Update changelog with new entry at the beginning
+    execute_cmd "printf '%s\n%s' \"\$(generate_changelog \"$NEW_VERSION\")\" \"\$(cat CHANGELOG.md)\" > CHANGELOG.md"
+    
+    # Stage changes
+    execute_cmd "git add VERSION CHANGELOG.md"
+    execute_cmd "git commit -m 'chore: bump version $NEW_VERSION'"
+    
+    echo -e "${GREEN}Version bump prepared successfully!${NC}"
+    echo -e "${YELLOW}Review the changes and push manually when ready.${NC}"
 }
 
 # Function to create tag in main
@@ -178,7 +150,6 @@ ${BOLD}The following actions will be taken:${NC}"
 
     echo -e "${BOLD}1. Create and Push Tag${NC}"
     execute_cmd "git tag -a v$CURRENT_VERSION -m \"Release version $CURRENT_VERSION\""
-    execute_cmd "git push origin v$CURRENT_VERSION"
     
     if [ "$DRY_RUN" = true ]; then
         echo -e "
@@ -187,14 +158,14 @@ ${YELLOW}$BOX_TOP"
         echo -e "$BOX_DIVIDER"
         center_text "The following would have been done:"
         center_text "→ Created tag v$CURRENT_VERSION"
-        center_text "→ Pushed tag to origin"
         echo -e "$BOX_BOTTOM${NC}"
     else
         echo -e "
 ${GREEN}$BOX_TOP"
-        center_text "TAG CREATED AND PUSHED"
+        center_text "TAG CREATED"
         center_text "v$CURRENT_VERSION"
         echo -e "$BOX_BOTTOM${NC}"
+        echo -e "${YELLOW}Please push the tag manually when ready.${NC}"
     fi
 }
 
