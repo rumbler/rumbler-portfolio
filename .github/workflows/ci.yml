@@ -65,7 +65,7 @@ jobs:
                 ENVIRONMENT="production"
               fi
             elif [[ $GITHUB_REF == 'refs/heads/main' ]]; then
-              VERSION="v$(git rev-parse --short HEAD)"
+              VERSION="rc-$(git rev-parse --short HEAD)"
               ENVIRONMENT="release"
             fi
           fi
