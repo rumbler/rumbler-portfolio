@@ -152,14 +152,15 @@ prepare_version() {
     center_text "New Version: $NEW_VERSION"
     echo "$BOX_BOTTOM"
 
-    # Update VERSION file
+    # Update VERSION file and package.json
     execute_cmd "echo $NEW_VERSION > VERSION"
+    execute_cmd "pnpm version $NEW_VERSION --no-git-tag-version"
     
     # Update changelog with new entry at the beginning
     execute_cmd "printf '%s\n%s' \"\$(generate_changelog \"$NEW_VERSION\")\" \"\$(cat CHANGELOG.md)\" > CHANGELOG.md"
     
     # Stage changes
-    execute_cmd "git add VERSION CHANGELOG.md"
+    execute_cmd "git add VERSION package.json CHANGELOG.md"
     execute_cmd "git commit -m 'chore: bump version $NEW_VERSION'"
     
     echo -e "${GREEN}Version bump prepared successfully!${NC}"
@@ -207,13 +208,13 @@ ${GREEN}$BOX_TOP"
 CURRENT_BRANCH=$(git branch --show-current)
 
 if [ "$VERSION_TYPE" = "tag" ]; then
-    if [ "$CURRENT_BRANCH" != "main" ]; then
+    if [ "$DRY_RUN" = false ] && [ "$CURRENT_BRANCH" != "main" ]; then
         echo -e "${RED}Error: Tags can only be created from the main branch${NC}"
         exit 1
     fi
     create_tag
 else
-    if [ "$CURRENT_BRANCH" != "development" ]; then
+    if [ "$DRY_RUN" = false ] && [ "$CURRENT_BRANCH" != "development" ]; then
         echo -e "${RED}Error: Version bumps can only be done from the development branch${NC}"
         exit 1
     fi
