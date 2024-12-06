@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/rumbler/rumbler-portfolio/actions/workflows/ci.yml/badge.svg)](https://github.com/rumbler/rumbler-portfolio/actions/workflows/ci.yml)
 [![Development](https://github.com/rumbler/rumbler-portfolio/actions/workflows/development.yml/badge.svg)](https://github.com/rumbler/rumbler-portfolio/actions/workflows/development.yml)
+[![Release](https://github.com/rumbler/rumbler-portfolio/actions/workflows/release.yml/badge.svg)](https://github.com/rumbler/rumbler-portfolio/actions/workflows/release.yml)
 [![Production](https://github.com/rumbler/rumbler-portfolio/actions/workflows/production.yml/badge.svg)](https://github.com/rumbler/rumbler-portfolio/actions/workflows/production.yml)
 
 > A modern and responsive portfolio built with React and TypeScript.
