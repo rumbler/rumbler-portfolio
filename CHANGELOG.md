@@ -1,10 +1,365 @@
-# Changelog
 
-## [1.0.1] - 2024-12-03
+## [1.1.6] - 2024-12-06
+
+### Added
+- feat: allow version:tag:dry in any branch
+- feat: improve version management
+- feat: automatic changelog generation from commits
+- feat: unify docker-compose and streamline CI/CD (#45)
+
+### Fixed
+- fix: add blank line before version headers in changelog
+- fix: improve version-bump script (#48)
+- fix: update version prefix in CI to match CD expectations (#43)
+- fix: ajusta condições do CI para processar merges em main via push (#42)
+- fix: resolve conflict
+- fix: resolve conflicts in release workflow (#40)
+- fix: resolve conflicts in release workflow (#37)
+- fix: resolve release workflow conflicts (#36)
+- fix: correct artifact path in release workflow
+- fix: update workflows and docker configurations
+- fix: update docker image name in docker-compose.yml
+- fix: simplify CI/CD workflows
+- fix: changecondition for run cd
+- fix: changecondition for run cd
+- fix: adjust CI workflow to handle development push events
+- fix: adjust CD workflow conditions to check base branch
+- fix: add development branch to CI trigger
+- fix: add CI workflow dependency to development CD
+- fix: update development workflow
+- fix: improve CI workflow triggers and artifact paths
+- fix: correct merged PR condition in CI workflow
+- fix: adjust workflows to use environment-specific artifacts
+- fix: add development branch to CI trigger
+- fix: improve production workflow
+- fix: update CD workflows to run on push
+- fix: improve version bump flow and documentation (#14)
+- fix: update workflows and docker configurations
+- fix: update docker image name in docker-compose.yml
+- fix: simplify CI/CD workflows
+- fix: changecondition for run cd
+- fix: changecondition for run cd
+- fix: adjust CI workflow to handle development push events
+- fix: adjust CD workflow conditions to check base branch
+- fix: add development branch to CI trigger
+- fix: add CI workflow dependency to development CD
+- fix: update development workflow
+- fix: improve CI workflow triggers and artifact paths
+- fix: correct merged PR condition in CI workflow
+- fix: adjust workflows to use environment-specific artifacts
+- fix: add development branch to CI trigger
+- fix: improve production workflow
+- fix: update CD workflows to run on push
+- fix: improve version bump flow and documentation (#14)
 
 ### Other Changes
+- chore: bump version 1.1.5
+- chore: bump version 1.1.4
+- chore: bump version 1.1.3
+- chore: bump version 1.1.2
+- chore: bump version 1.1.1
+- chore: bump version 1.1.0
+- chore: enhance version bump script and align with GitLab Flow (#47)
+- chore: resolve merge conflicts with main
+- chore: sync main changes to development (#44)
+- chore: merge development into main (#41)
 
-- chore: sync development with main after version bump to 1.0.0
+## [1.1.5] - 2024-12-06
+
+### Added
+- feat: allow version:tag:dry in any branch
+- feat: improve version management
+- feat: automatic changelog generation from commits
+- feat: unify docker-compose and streamline CI/CD (#45)
+
+### Fixed
+- fix: improve version-bump script (#48)
+- fix: update version prefix in CI to match CD expectations (#43)
+- fix: ajusta condições do CI para processar merges em main via push (#42)
+- fix: resolve conflict
+- fix: resolve conflicts in release workflow (#40)
+- fix: resolve conflicts in release workflow (#37)
+- fix: resolve release workflow conflicts (#36)
+- fix: correct artifact path in release workflow
+- fix: update workflows and docker configurations
+- fix: update docker image name in docker-compose.yml
+- fix: simplify CI/CD workflows
+- fix: changecondition for run cd
+- fix: changecondition for run cd
+- fix: adjust CI workflow to handle development push events
+- fix: adjust CD workflow conditions to check base branch
+- fix: add development branch to CI trigger
+- fix: add CI workflow dependency to development CD
+- fix: update development workflow
+- fix: improve CI workflow triggers and artifact paths
+- fix: correct merged PR condition in CI workflow
+- fix: adjust workflows to use environment-specific artifacts
+- fix: add development branch to CI trigger
+- fix: improve production workflow
+- fix: update CD workflows to run on push
+- fix: improve version bump flow and documentation (#14)
+- fix: update workflows and docker configurations
+- fix: update docker image name in docker-compose.yml
+- fix: simplify CI/CD workflows
+- fix: changecondition for run cd
+- fix: changecondition for run cd
+- fix: adjust CI workflow to handle development push events
+- fix: adjust CD workflow conditions to check base branch
+- fix: add development branch to CI trigger
+- fix: add CI workflow dependency to development CD
+- fix: update development workflow
+- fix: improve CI workflow triggers and artifact paths
+- fix: correct merged PR condition in CI workflow
+- fix: adjust workflows to use environment-specific artifacts
+- fix: add development branch to CI trigger
+- fix: improve production workflow
+- fix: update CD workflows to run on push
+- fix: improve version bump flow and documentation (#14)
+
+### Other Changes
+- chore: bump version 1.1.4
+- chore: bump version 1.1.3
+- chore: bump version 1.1.2
+- chore: bump version 1.1.1
+- chore: bump version 1.1.0
+- chore: enhance version bump script and align with GitLab Flow (#47)
+- chore: resolve merge conflicts with main
+- chore: sync main changes to development (#44)
+- chore: merge development into main (#41)
+## [1.1.4] - 2024-12-06
+
+### Added
+- feat: improve version management
+- feat: automatic changelog generation from commits
+- feat: unify docker-compose and streamline CI/CD (#45)
+
+### Fixed
+- fix: improve version-bump script (#48)
+- fix: update version prefix in CI to match CD expectations (#43)
+- fix: ajusta condições do CI para processar merges em main via push (#42)
+- fix: resolve conflict
+- fix: resolve conflicts in release workflow (#40)
+- fix: resolve conflicts in release workflow (#37)
+- fix: resolve release workflow conflicts (#36)
+- fix: correct artifact path in release workflow
+- fix: update workflows and docker configurations
+- fix: update docker image name in docker-compose.yml
+- fix: simplify CI/CD workflows
+- fix: changecondition for run cd
+- fix: changecondition for run cd
+- fix: adjust CI workflow to handle development push events
+- fix: adjust CD workflow conditions to check base branch
+- fix: add development branch to CI trigger
+- fix: add CI workflow dependency to development CD
+- fix: update development workflow
+- fix: improve CI workflow triggers and artifact paths
+- fix: correct merged PR condition in CI workflow
+- fix: adjust workflows to use environment-specific artifacts
+- fix: add development branch to CI trigger
+- fix: improve production workflow
+- fix: update CD workflows to run on push
+- fix: improve version bump flow and documentation (#14)
+- fix: update workflows and docker configurations
+- fix: update docker image name in docker-compose.yml
+- fix: simplify CI/CD workflows
+- fix: changecondition for run cd
+- fix: changecondition for run cd
+- fix: adjust CI workflow to handle development push events
+- fix: adjust CD workflow conditions to check base branch
+- fix: add development branch to CI trigger
+- fix: add CI workflow dependency to development CD
+- fix: update development workflow
+- fix: improve CI workflow triggers and artifact paths
+- fix: correct merged PR condition in CI workflow
+- fix: adjust workflows to use environment-specific artifacts
+- fix: add development branch to CI trigger
+- fix: improve production workflow
+- fix: update CD workflows to run on push
+- fix: improve version bump flow and documentation (#14)
+
+### Other Changes
+- chore: bump version 1.1.3
+- chore: bump version 1.1.2
+- chore: bump version 1.1.1
+- chore: bump version 1.1.0
+- chore: enhance version bump script and align with GitLab Flow (#47)
+- chore: resolve merge conflicts with main
+- chore: sync main changes to development (#44)
+- chore: merge development into main (#41)
+## [1.1.3] - 2024-12-06
+
+### Added
+- feat: improve version management
+- feat: automatic changelog generation from commits
+- feat: unify docker-compose and streamline CI/CD (#45)
+
+### Fixed
+- fix: improve version-bump script (#48)
+- fix: update version prefix in CI to match CD expectations (#43)
+- fix: ajusta condições do CI para processar merges em main via push (#42)
+- fix: resolve conflict
+- fix: resolve conflicts in release workflow (#40)
+- fix: resolve conflicts in release workflow (#37)
+- fix: resolve release workflow conflicts (#36)
+- fix: correct artifact path in release workflow
+- fix: update workflows and docker configurations
+- fix: update docker image name in docker-compose.yml
+- fix: simplify CI/CD workflows
+- fix: changecondition for run cd
+- fix: changecondition for run cd
+- fix: adjust CI workflow to handle development push events
+- fix: adjust CD workflow conditions to check base branch
+- fix: add development branch to CI trigger
+- fix: add CI workflow dependency to development CD
+- fix: update development workflow
+- fix: improve CI workflow triggers and artifact paths
+- fix: correct merged PR condition in CI workflow
+- fix: adjust workflows to use environment-specific artifacts
+- fix: add development branch to CI trigger
+- fix: improve production workflow
+- fix: update CD workflows to run on push
+- fix: improve version bump flow and documentation (#14)
+- fix: update workflows and docker configurations
+- fix: update docker image name in docker-compose.yml
+- fix: simplify CI/CD workflows
+- fix: changecondition for run cd
+- fix: changecondition for run cd
+- fix: adjust CI workflow to handle development push events
+- fix: adjust CD workflow conditions to check base branch
+- fix: add development branch to CI trigger
+- fix: add CI workflow dependency to development CD
+- fix: update development workflow
+- fix: improve CI workflow triggers and artifact paths
+- fix: correct merged PR condition in CI workflow
+- fix: adjust workflows to use environment-specific artifacts
+- fix: add development branch to CI trigger
+- fix: improve production workflow
+- fix: update CD workflows to run on push
+- fix: improve version bump flow and documentation (#14)
+
+### Other Changes
+- chore: bump version 1.1.2
+- chore: bump version 1.1.1
+- chore: bump version 1.1.0
+- chore: enhance version bump script and align with GitLab Flow (#47)
+- chore: resolve merge conflicts with main
+- chore: sync main changes to development (#44)
+- chore: merge development into main (#41)
+## [1.1.2] - 2024-12-06
+
+### Added
+- feat: improve version management
+- feat: automatic changelog generation from commits
+- feat: unify docker-compose and streamline CI/CD (#45)
+
+### Fixed
+- fix: improve version-bump script (#48)
+- fix: update version prefix in CI to match CD expectations (#43)
+- fix: ajusta condições do CI para processar merges em main via push (#42)
+- fix: resolve conflict
+- fix: resolve conflicts in release workflow (#40)
+- fix: resolve conflicts in release workflow (#37)
+- fix: resolve release workflow conflicts (#36)
+- fix: correct artifact path in release workflow
+- fix: update workflows and docker configurations
+- fix: update docker image name in docker-compose.yml
+- fix: simplify CI/CD workflows
+- fix: changecondition for run cd
+- fix: changecondition for run cd
+- fix: adjust CI workflow to handle development push events
+- fix: adjust CD workflow conditions to check base branch
+- fix: add development branch to CI trigger
+- fix: add CI workflow dependency to development CD
+- fix: update development workflow
+- fix: improve CI workflow triggers and artifact paths
+- fix: correct merged PR condition in CI workflow
+- fix: adjust workflows to use environment-specific artifacts
+- fix: add development branch to CI trigger
+- fix: improve production workflow
+- fix: update CD workflows to run on push
+- fix: improve version bump flow and documentation (#14)
+- fix: update workflows and docker configurations
+- fix: update docker image name in docker-compose.yml
+- fix: simplify CI/CD workflows
+- fix: changecondition for run cd
+- fix: changecondition for run cd
+- fix: adjust CI workflow to handle development push events
+- fix: adjust CD workflow conditions to check base branch
+- fix: add development branch to CI trigger
+- fix: add CI workflow dependency to development CD
+- fix: update development workflow
+- fix: improve CI workflow triggers and artifact paths
+- fix: correct merged PR condition in CI workflow
+- fix: adjust workflows to use environment-specific artifacts
+- fix: add development branch to CI trigger
+- fix: improve production workflow
+- fix: update CD workflows to run on push
+- fix: improve version bump flow and documentation (#14)
+
+### Other Changes
+- chore: bump version 1.1.1
+- chore: bump version 1.1.0
+- chore: enhance version bump script and align with GitLab Flow (#47)
+- chore: resolve merge conflicts with main
+- chore: sync main changes to development (#44)
+- chore: merge development into main (#41)
+## [1.1.1] - 2024-12-06
+
+### Added
+- feat: automatic changelog generation from commits
+- feat: unify docker-compose and streamline CI/CD (#45)
+
+### Fixed
+- fix: improve version-bump script (#48)
+- fix: update version prefix in CI to match CD expectations (#43)
+- fix: ajusta condições do CI para processar merges em main via push (#42)
+- fix: resolve conflict
+- fix: resolve conflicts in release workflow (#40)
+- fix: resolve conflicts in release workflow (#37)
+- fix: resolve release workflow conflicts (#36)
+- fix: correct artifact path in release workflow
+- fix: update workflows and docker configurations
+- fix: update docker image name in docker-compose.yml
+- fix: simplify CI/CD workflows
+- fix: changecondition for run cd
+- fix: changecondition for run cd
+- fix: adjust CI workflow to handle development push events
+- fix: adjust CD workflow conditions to check base branch
+- fix: add development branch to CI trigger
+- fix: add CI workflow dependency to development CD
+- fix: update development workflow
+- fix: improve CI workflow triggers and artifact paths
+- fix: correct merged PR condition in CI workflow
+- fix: adjust workflows to use environment-specific artifacts
+- fix: add development branch to CI trigger
+- fix: improve production workflow
+- fix: update CD workflows to run on push
+- fix: improve version bump flow and documentation (#14)
+- fix: update workflows and docker configurations
+- fix: update docker image name in docker-compose.yml
+- fix: simplify CI/CD workflows
+- fix: changecondition for run cd
+- fix: changecondition for run cd
+- fix: adjust CI workflow to handle development push events
+- fix: adjust CD workflow conditions to check base branch
+- fix: add development branch to CI trigger
+- fix: add CI workflow dependency to development CD
+- fix: update development workflow
+- fix: improve CI workflow triggers and artifact paths
+- fix: correct merged PR condition in CI workflow
+- fix: adjust workflows to use environment-specific artifacts
+- fix: add development branch to CI trigger
+- fix: improve production workflow
+- fix: update CD workflows to run on push
+- fix: improve version bump flow and documentation (#14)
+
+### Other Changes
+- chore: bump version 1.1.0
+- chore: enhance version bump script and align with GitLab Flow (#47)
+- chore: resolve merge conflicts with main
+- chore: sync main changes to development (#44)
+- chore: merge development into main (#41)
+# Changelog
 
 ## [1.0.0] - 2024-12-02
 
@@ -124,3 +479,16 @@
 ### Chore
 - Added author and description to package.json
 - Configured initial project setup
+[0;36m## [1.1.0] - 2024-12-06
+
+### Added
+- [Feature] Add your new features here
+- [Enhancement] List your enhancements
+
+### Changed
+- [Update] List your updates here
+- [Refactor] List your refactors
+
+### Fixed
+- [Fix] List your bug fixes here
+- [Security] List your security fixes[0m

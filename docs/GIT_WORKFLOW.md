@@ -1,13 +1,13 @@
 # 🔄 Git Workflow
 
-This document describes the Git practices adopted in this project, following GitHub Flow.
+This document describes the Git practices adopted in this project, following GitLab Flow methodology with environment-based branches and version management.
 
 ## 🌳 Main Branches
 
 ### `main`
 
-- 🚫 Pre-production (release) branch
-- Always stable and ready for final testing
+- 🚫 Release branch
+- Always stable and ready for release
 - Protected branch rules:
   - No direct pushes allowed
   - Requires pull request before merging
@@ -17,13 +17,14 @@ This document describes the Git practices adopted in this project, following Git
   - Branch cannot be deleted
   - Linear history required (no merge commits)
 - Receives merges only from `development` via Pull Request
-- Generates RC tags automatically after each merge
-- Base for production tags creation
+- Base for production version tags
+- Base for release environment
+- After validation in release, promotes to production
 
 ### `development`
 
-- 🌱 Development and staging branch
-- Integration environment
+- 🌱 Development branch
+- Integration environment for features
 - Protected branch rules:
   - No direct pushes allowed
   - Requires pull request before merging
@@ -34,7 +35,7 @@ This document describes the Git practices adopted in this project, following Git
   - Linear history required (no merge commits)
 - Receives feature branch merges
 - Base for new features
-- Automatic deployment to staging environment
+- Base for development environment
 
 ## 📝 Temporary Branches
 
@@ -64,19 +65,20 @@ This document describes the Git practices adopted in this project, following Git
 
 ## 🏷️ Versioning
 
-### RC Tags (Release Candidate)
+### Version Management
 
-- Generated automatically after merge to `main`
-- Format: `vX.Y.Z-rc.N`
-  - X.Y.Z: current or next version
-  - N: incremental RC number
-- Example: `v1.2.0-rc.1`, `v1.2.0-rc.2`
-- Automatic deployment to release environment
+- Managed through `version-bump.sh` script
+- Development branch:
+  - Run before merging to main: `pnpm version:patch` (or minor/major)
+  - Updates VERSION, CHANGELOG.md, and package.json
+  - Creates version commit automatically
+- Main branch:
+  - Run after merge approval: `pnpm version:patch` (or minor/major)
+  - Creates and pushes version tag automatically
+  - Format: `vX.Y.Z`
 
-### Production Tags
+### Semantic Versioning
 
-- Created manually after RC validation
-- Format: `vX.Y.Z`
 - Follows Semantic Versioning:
   - MAJOR (X): incompatible changes
   - MINOR (Y): new backwards-compatible features
@@ -100,29 +102,42 @@ This document describes the Git practices adopted in this project, following Git
    - Create branch `feat/name` from `development`
    - Develop and commit changes
    - Open PR to `development`
-   - Merge after approval
+   - Merge after approval and CI checks
+   - Automatic deployment to development environment for testing
 
-2. **Release Preparation**
+2. **Release Process**
+   - In development branch:
+     - Run `pnpm version:patch` (or minor/major)
+     - Push version changes
    - Open PR from `development` to `main`
-   - After approval and merge:
-     - CI generates RC tag automatically
-     - Deploys to release environment
+   - After approval and CI checks:
+     - Switch to main branch
+     - Run `pnpm version:patch` (or minor/major)
+     - Tag is created and pushed automatically
+     - CI deploys to release environment
+     - After validation in release, promotes to production
 
-3. **Production Release**
-   - Test RC version in release environment
-   - If approved:
-     - Create production tag manually
-     - CI deploys to production
-   - If issues found:
-     - Fix in `development`
-     - New PR to `main`
-     - New RC generated
+3. **Production Issues**
+   - For urgent fixes:
+     - Create `fix/name` from `main`
+     - Fix the issue
+     - Run `pnpm version:patch` in main
+     - Deploy to release for validation
+     - After validation, promote to production
+     - Merge back to both `main` AND `development`
+   - For non-urgent fixes:
+     - Create `fix/name` from `development`
+     - Fix the issue
+     - Follow normal release process
 
 ## ✅ Best Practices
 
 - Keep commits small and focused
 - Write meaningful commit messages
 - Update documentation when needed
-- Always create PR for `main`
+- Always create PR for changes
 - Perform thorough code reviews
-- Test RCs properly before production
+- Test in development before release
+- Validate in release before production
+- Use version bump script for releases
+- Keep branches synchronized
