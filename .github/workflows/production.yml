@@ -1,12 +1,6 @@
 name: Production CD
 
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version to deploy'
-        required: true
-        type: string
   push:
     tags:
       - 'v[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'
