@@ -183,7 +183,7 @@ ${BOLD}The following actions will be taken:${NC}"
     echo -e "${BOLD}1. Create and Push Tag${NC}"
     if [ "$DRY_RUN" = true ]; then
         echo -e "${YELLOW}Would execute:${NC} git tag -a v$CURRENT_VERSION -m \"Release version $CURRENT_VERSION\""
-        echo -e "${YELLOW}Would execute:${NC} git push origin v$CURRENT_VERSION"
+        echo -e "${YELLOW}Would execute:${NC} git push --follow-tags origin main"
         
         echo -e "
 ${YELLOW}$BOX_TOP"
@@ -195,7 +195,7 @@ ${YELLOW}$BOX_TOP"
         echo -e "$BOX_BOTTOM${NC}"
     else
         execute_cmd "git tag -a v$CURRENT_VERSION -m \"Release version $CURRENT_VERSION\""
-        execute_cmd "git push origin v$CURRENT_VERSION"
+        execute_cmd "git push --follow-tags origin main"
         
         echo -e "
 ${GREEN}$BOX_TOP"
