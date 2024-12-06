@@ -28,21 +28,20 @@ center_text() {
 
 # Check if help is requested
 if [ "$1" = "--help" ] || [ "$1" = "-h" ] || [ "$2" = "--help" ] || [ "$2" = "-h" ]; then
-    echo -e "${CYAN}Usage: $0 [patch|minor|major] [--dry-run]${NC}"
+    echo -e "${CYAN}Usage: $0 [patch|minor|major|tag] [--dry-run]${NC}"
     echo -e "${YELLOW}Options:${NC}"
     echo "  --dry-run    Simulate the version bump without making changes"
     echo "  --help, -h   Show this help message"
     echo ""
-    echo -e "${BLUE}When run from development branch:${NC}"
-    echo "  - Updates VERSION, CHANGELOG.md"
-    echo -e "${BLUE}When run from main branch:${NC}"
-    echo "  - Creates and pushes a new version tag"
+    echo -e "${BLUE}Commands:${NC}"
+    echo "  patch, minor, major   Updates VERSION, CHANGELOG.md when in development branch"
+    echo "  tag                   Creates and pushes a new version tag when in main branch"
     exit 0
 fi
 
 # Check if version type is provided
 if [ $# -lt 1 ]; then
-    echo -e "${RED}Usage: $0 [patch|minor|major] [--dry-run]${NC}"
+    echo -e "${RED}Usage: $0 [patch|minor|major|tag] [--dry-run]${NC}"
     exit 1
 fi
 
@@ -59,8 +58,8 @@ if [ "$2" = "--dry-run" ]; then
 fi
 
 # Validate version type
-if [[ ! "$VERSION_TYPE" =~ ^(patch|minor|major)$ ]]; then
-    echo -e "${RED}Error: Version type must be patch, minor, or major${NC}"
+if [[ ! "$VERSION_TYPE" =~ ^(patch|minor|major|tag)$ ]]; then
+    echo -e "${RED}Error: Version type must be patch, minor, major, or tag${NC}"
     exit 1
 fi
 
@@ -171,65 +170,52 @@ prepare_version() {
 create_tag() {
     local CURRENT_VERSION=$(cat VERSION)
     
-    echo -e "
-${BOLD}Current State:${NC}
-   → Branch: ${CYAN}main${NC}
-   → Version to Tag: ${GREEN}$CURRENT_VERSION${NC}
+    echo -e "$BOX_TOP"
+    center_text "TAG OPERATION"
+    echo "$BOX_DIVIDER"
+    center_text "Version: v$CURRENT_VERSION"
+    echo "$BOX_BOTTOM
 
 ${BOLD}The following actions will be taken:${NC}"
 
     echo -e "${BOLD}1. Create and Push Tag${NC}"
-    execute_cmd "git tag -a v$CURRENT_VERSION -m \"Release version $CURRENT_VERSION\""
-    
     if [ "$DRY_RUN" = true ]; then
+        echo -e "${YELLOW}Would execute:${NC} git tag -a v$CURRENT_VERSION -m \"Release version $CURRENT_VERSION\""
+        echo -e "${YELLOW}Would execute:${NC} git push origin v$CURRENT_VERSION"
+        
         echo -e "
 ${YELLOW}$BOX_TOP"
         center_text "DRY RUN SUMMARY - MAIN BRANCH"
-        echo -e "$BOX_DIVIDER"
+        echo "$BOX_DIVIDER"
         center_text "The following would have been done:"
-        center_text "→ Created tag v$CURRENT_VERSION"
+        center_text "→ Create tag v$CURRENT_VERSION"
+        center_text "→ Push tag to origin"
         echo -e "$BOX_BOTTOM${NC}"
     else
+        execute_cmd "git tag -a v$CURRENT_VERSION -m \"Release version $CURRENT_VERSION\""
+        execute_cmd "git push origin v$CURRENT_VERSION"
+        
         echo -e "
 ${GREEN}$BOX_TOP"
-        center_text "TAG CREATED"
+        center_text "TAG CREATED AND PUSHED"
         center_text "v$CURRENT_VERSION"
         echo -e "$BOX_BOTTOM${NC}"
-        echo -e "${YELLOW}Please push the tag manually when ready.${NC}"
     fi
 }
 
 # Main execution
 CURRENT_BRANCH=$(git branch --show-current)
 
-# Sync with remote
-echo -e "${CYAN}Syncing with remote...${NC}"
-execute_cmd "git fetch --tags"
-
-# Get versions
-get_versions
-
-# In dry-run mode, show what would happen in both branches
-if [ "$DRY_RUN" = true ]; then
-    echo -e "
-${BOLD}Current branch:${NC} ${CYAN}$CURRENT_BRANCH${NC}
-"
-    prepare_version
-    echo ""
-    create_tag
-    exit 0
-fi
-
-# For actual execution, check branch
-case $CURRENT_BRANCH in
-    development)
-        prepare_version
-        ;;
-    main)
-        create_tag
-        ;;
-    *)
-        echo -e "${RED}Error: Must be on development branch to prepare version or main branch to create tag${NC}"
+if [ "$VERSION_TYPE" = "tag" ]; then
+    if [ "$CURRENT_BRANCH" != "main" ]; then
+        echo -e "${RED}Error: Tags can only be created from the main branch${NC}"
         exit 1
-        ;;
-esac
+    fi
+    create_tag
+else
+    if [ "$CURRENT_BRANCH" != "development" ]; then
+        echo -e "${RED}Error: Version bumps can only be done from the development branch${NC}"
+        exit 1
+    fi
+    prepare_version
+fi
