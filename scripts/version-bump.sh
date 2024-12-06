@@ -105,6 +105,7 @@ generate_changelog() {
     local others=$(git log --pretty=format:"%s" $(git describe --tags --abbrev=0 2>/dev/null || git rev-list --max-parents=0 HEAD)..HEAD | grep -vE "^(feat:|fix:|docs:)" || true)
 
     # Only include sections that have commits
+    echo ""  # Add blank line before version header
     echo "## [$version] - $(date +%Y-%m-%d)"
     echo
 
@@ -157,7 +158,7 @@ prepare_version() {
     execute_cmd "pnpm version $NEW_VERSION --no-git-tag-version"
     
     # Update changelog with new entry at the beginning
-    execute_cmd "printf '%s\n%s' \"\$(generate_changelog \"$NEW_VERSION\")\" \"\$(cat CHANGELOG.md)\" > CHANGELOG.md"
+    execute_cmd "printf '%s\n\n%s' \"\$(generate_changelog \"$NEW_VERSION\")\" \"\$(cat CHANGELOG.md)\" > CHANGELOG.md"
     
     # Stage changes
     execute_cmd "git add VERSION package.json CHANGELOG.md"
