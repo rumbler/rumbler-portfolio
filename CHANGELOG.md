@@ -1,4 +1,18 @@
 
+## [1.2.0] - 2024-12-09
+
+### Added
+- feat: enhance theme system with system preference detection (#58)
+
+### Fixed
+- fix: correct Header navigation and enhance tests (#57)
+- fix: update production workflow triggers
+- fix: resolve conflict
+
+### Other Changes
+- chore: bump version 1.1.8
+
+
 ## [1.1.8] - 2024-12-06
 
 ### Fixed
