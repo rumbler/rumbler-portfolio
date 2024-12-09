@@ -76,7 +76,7 @@ jobs:
 
       - name: Deploy to Production
         env:
-          PROD_IMAGE_TAG: ${{ github.event.inputs.version }}
+          PROD_IMAGE_TAG: ${{ github.event.inputs.version || steps.get_version.outputs.version }}
           REGISTRY_URL: ${{ secrets.REGISTRY_URL }}
           NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           NEXUS_PASS: ${{ secrets.NEXUS_PASSWORD }}
