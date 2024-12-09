@@ -38,7 +38,31 @@ describe('Header Component', () => {
     expect(screen.getByText('Skills')).toBeInTheDocument();
     expect(screen.getByText('Projects')).toBeInTheDocument();
     expect(screen.getByText('About')).toBeInTheDocument();
-    expect(screen.getByText('Contacts')).toBeInTheDocument();
+    expect(screen.getByText('Contact')).toBeInTheDocument();
+  });
+
+  it('has correct href for Contact link', () => {
+    renderHeader();
+    const contactLink = screen.getByText('Contact').closest('a');
+    expect(contactLink).toHaveAttribute('href', '#contact');
+  });
+
+  it('has correct hrefs for all navigation links', () => {
+    renderHeader();
+    
+    const navigationLinks = {
+      'Pipelines': '#pipelines',
+      'Developer': '#developer',
+      'Skills': '#skills',
+      'Projects': '#projects',
+      'About': '#about',
+      'Contact': '#contact'
+    };
+
+    Object.entries(navigationLinks).forEach(([text, href]) => {
+      const link = screen.getByText(text).closest('a');
+      expect(link).toHaveAttribute('href', href);
+    });
   });
 
   it('toggles theme when theme button is clicked', () => {

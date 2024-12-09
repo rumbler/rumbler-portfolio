@@ -50,7 +50,7 @@ const Header: React.FC = () => {
           <NavItem href="#skills" onClick={handleNavClick}>Skills</NavItem>
           <NavItem href="#projects" onClick={handleNavClick}>Projects</NavItem>
           <NavItem href="#about" onClick={handleNavClick}>About</NavItem>
-          <NavItem href="#contacts" onClick={handleNavClick}>Contacts</NavItem>
+          <NavItem href="#contact" onClick={handleNavClick}>Contact</NavItem>
           <ThemeToggle onClick={toggleTheme} aria-label={isDarkMode ? "Switch to light theme" : "Switch to dark theme"}>
             {isDarkMode ? <FaSun /> : <FaMoon />}
           </ThemeToggle>
