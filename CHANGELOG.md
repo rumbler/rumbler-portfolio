@@ -1,3 +1,9 @@
+
+## [1.2.1] - 2024-12-09
+
+### Fixed
+- fix: ensure production deployment uses correct version tag
+
 ## [1.2.0] - 2024-12-09
 
 ### Added
