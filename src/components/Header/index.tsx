@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { HeaderContainer, Logo, NavMenu, NavItem, ThemeToggle, FloatingButton } from './styles';
+import { HeaderContainer, Logo, NavMenu, NavItem, ThemeToggle, FloatingButton, ThemeSelect } from './styles';
 import { useTheme } from '../../contexts/ThemeContext';
-import { FaSun, FaMoon, FaBars, FaTimes } from 'react-icons/fa';
+import { FaSun, FaMoon, FaBars, FaTimes, FaDesktop } from 'react-icons/fa';
 
 const Header: React.FC = () => {
-  const { isDarkMode, toggleTheme } = useTheme();
+  const { currentMode, setThemeMode } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showThemeSelect, setShowThemeSelect] = useState(false);
   const [shouldCollapse, setShouldCollapse] = useState(() => window.innerWidth <= 768);
 
   useEffect(() => {
@@ -40,6 +41,26 @@ const Header: React.FC = () => {
     setIsMenuOpen(false);
   };
 
+  const handleThemeClick = () => {
+    setShowThemeSelect(!showThemeSelect);
+  };
+
+  const handleThemeSelect = (mode: 'light' | 'dark' | 'system') => {
+    setThemeMode(mode);
+    setShowThemeSelect(false);
+  };
+
+  const getThemeIcon = () => {
+    switch (currentMode) {
+      case 'light':
+        return <FaSun />;
+      case 'dark':
+        return <FaMoon />;
+      case 'system':
+        return <FaDesktop />;
+    }
+  };
+
   return (
     <>
       <HeaderContainer $isOpen={isMenuOpen} $shouldCollapse={shouldCollapse}>
@@ -50,20 +71,38 @@ const Header: React.FC = () => {
           <NavItem href="#skills" onClick={handleNavClick}>Skills</NavItem>
           <NavItem href="#projects" onClick={handleNavClick}>Projects</NavItem>
           <NavItem href="#about" onClick={handleNavClick}>About</NavItem>
-          <NavItem href="#contacts" onClick={handleNavClick}>Contacts</NavItem>
-          <ThemeToggle onClick={toggleTheme} aria-label={isDarkMode ? "Switch to light theme" : "Switch to dark theme"}>
-            {isDarkMode ? <FaSun /> : <FaMoon />}
+          <NavItem href="#contact" onClick={handleNavClick}>Contact</NavItem>
+          <ThemeToggle 
+            onClick={handleThemeClick} 
+            aria-label="Theme selector"
+          >
+            {getThemeIcon()}
           </ThemeToggle>
+          {showThemeSelect && (
+            <ThemeSelect>
+              <button onClick={() => handleThemeSelect('light')}>
+                <FaSun /> Light
+              </button>
+              <button onClick={() => handleThemeSelect('dark')}>
+                <FaMoon /> Dark
+              </button>
+              <button onClick={() => handleThemeSelect('system')}>
+                <FaDesktop /> System
+              </button>
+            </ThemeSelect>
+          )}
         </NavMenu>
       </HeaderContainer>
-      <FloatingButton 
-        onClick={handleMenuClick}
-        $isOpen={isMenuOpen}
-        $shouldShow={shouldCollapse}
-        aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-      >
-        {isMenuOpen ? <FaTimes /> : <FaBars />}
-      </FloatingButton>
+      {shouldCollapse && (
+        <FloatingButton 
+          onClick={handleMenuClick}
+          $isOpen={isMenuOpen}
+          $shouldShow={shouldCollapse}
+          aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+        >
+          {isMenuOpen ? <FaTimes /> : <FaBars />}
+        </FloatingButton>
+      )}
     </>
   );
 };

@@ -1,17 +1,16 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { ThemeProvider } from 'styled-components';
 import { lightTheme } from '../../../styles/themes';
 import Header from '../index';
 
-const mockToggleTheme = jest.fn();
+const mockSetThemeMode = jest.fn();
 
-// Mock do useTheme hook
 jest.mock('../../../contexts/ThemeContext', () => ({
   useTheme: () => ({
     isDarkMode: false,
-    toggleTheme: mockToggleTheme,
+    currentMode: 'system',
+    setThemeMode: mockSetThemeMode,
   }),
 }));
 
@@ -26,7 +25,8 @@ const renderHeader = () => {
 describe('Header Component', () => {
   beforeEach(() => {
     window.innerWidth = 1024;
-    mockToggleTheme.mockClear();
+    mockSetThemeMode.mockClear();
+    localStorage.clear();
   });
 
   it('renders logo and navigation items', () => {
@@ -38,16 +38,62 @@ describe('Header Component', () => {
     expect(screen.getByText('Skills')).toBeInTheDocument();
     expect(screen.getByText('Projects')).toBeInTheDocument();
     expect(screen.getByText('About')).toBeInTheDocument();
-    expect(screen.getByText('Contacts')).toBeInTheDocument();
+    expect(screen.getByText('Contact')).toBeInTheDocument();
   });
 
-  it('toggles theme when theme button is clicked', () => {
+  it('has correct hrefs for all navigation links', () => {
     renderHeader();
     
-    const themeButton = screen.getByRole('button', { name: /switch to dark theme/i });
-    fireEvent.click(themeButton);
-    
-    expect(mockToggleTheme).toHaveBeenCalledTimes(1);
+    const navigationLinks = {
+      'Pipelines': '#pipelines',
+      'Developer': '#developer',
+      'Skills': '#skills',
+      'Projects': '#projects',
+      'About': '#about',
+      'Contact': '#contact'
+    };
+
+    Object.entries(navigationLinks).forEach(([text, href]) => {
+      const link = screen.getByText(text).closest('a');
+      expect(link).toHaveAttribute('href', href);
+    });
+  });
+
+  describe('Theme Selection', () => {
+    it('shows theme options when theme button is clicked', () => {
+      renderHeader();
+      
+      const themeButton = screen.getByLabelText('Theme selector');
+      fireEvent.click(themeButton);
+      
+      expect(screen.getByText('Light')).toBeInTheDocument();
+      expect(screen.getByText('Dark')).toBeInTheDocument();
+      expect(screen.getByText('System')).toBeInTheDocument();
+    });
+
+    it('calls setThemeMode with correct theme when option is selected', () => {
+      renderHeader();
+      
+      const themeButton = screen.getByLabelText('Theme selector');
+      fireEvent.click(themeButton);
+      
+      const lightOption = screen.getByText('Light');
+      fireEvent.click(lightOption);
+      
+      expect(mockSetThemeMode).toHaveBeenCalledWith('light');
+    });
+
+    it('closes theme selector after selecting an option', () => {
+      renderHeader();
+      
+      const themeButton = screen.getByLabelText('Theme selector');
+      fireEvent.click(themeButton);
+      
+      const darkOption = screen.getByText('Dark');
+      fireEvent.click(darkOption);
+      
+      expect(screen.queryByText('Light')).not.toBeInTheDocument();
+    });
   });
 
   describe('Mobile Menu', () => {

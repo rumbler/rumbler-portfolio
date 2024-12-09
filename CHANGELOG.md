@@ -1,3 +1,15 @@
+## [1.2.0] - 2024-12-09
+
+### Added
+- feat: enhance theme system with system preference detection (#58)
+
+### Fixed
+- fix: correct Header navigation and enhance tests (#57)
+- fix: update production workflow triggers
+- fix: resolve conflict
+
+### Other Changes
+- chore: bump version 1.1.8
 
 ## [1.1.8] - 2024-12-06
 
@@ -139,6 +151,7 @@
 - chore: resolve merge conflicts with main
 - chore: sync main changes to development (#44)
 - chore: merge development into main (#41)
+
 ## [1.1.4] - 2024-12-06
 
 ### Added
@@ -199,6 +212,7 @@
 - chore: resolve merge conflicts with main
 - chore: sync main changes to development (#44)
 - chore: merge development into main (#41)
+
 ## [1.1.3] - 2024-12-06
 
 ### Added
@@ -258,6 +272,7 @@
 - chore: resolve merge conflicts with main
 - chore: sync main changes to development (#44)
 - chore: merge development into main (#41)
+
 ## [1.1.2] - 2024-12-06
 
 ### Added
@@ -316,6 +331,7 @@
 - chore: resolve merge conflicts with main
 - chore: sync main changes to development (#44)
 - chore: merge development into main (#41)
+
 ## [1.1.1] - 2024-12-06
 
 ### Added
@@ -492,7 +508,7 @@
 ### Chore
 - Added author and description to package.json
 - Configured initial project setup
-[0;36m## [1.1.0] - 2024-12-06
+## [1.1.0] - 2024-12-06
 
 ### Added
 - [Feature] Add your new features here
@@ -504,4 +520,4 @@
 
 ### Fixed
 - [Fix] List your bug fixes here
-- [Security] List your security fixes[0m
+- [Security] List your security fixes
