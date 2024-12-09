@@ -218,6 +218,40 @@ export const ThemeToggle = styled.button`
   }
 `;
 
+export const ThemeSelect = styled.div`
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: ${({ theme }) => theme.secondaryBackground};
+  border: 1px solid ${({ theme }) => theme.border};
+  border-radius: 8px;
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.5rem 1rem;
+    background: none;
+    border: none;
+    color: ${({ theme }) => theme.text};
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: ${({ theme }) => theme.hover};
+    }
+
+    svg {
+      font-size: 1rem;
+    }
+  }
+`;
+
 export const FloatingButton = styled.button<FloatingButtonProps>`
   position: fixed;
   bottom: 2rem;
