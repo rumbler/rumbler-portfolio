@@ -1,26 +1,19 @@
 import { render, screen } from '@testing-library/react';
 import About from '../index';
+import React from 'react';
 
 // Mock styled-components
-jest.mock('styled-components', () => {
-  const styled = {
-    section: (strings: TemplateStringsArray, ...args: any[]) => 
-      ({ children, ...props }: any) => <section {...props}>{children}</section>,
-    div: (strings: TemplateStringsArray, ...args: any[]) => 
-      ({ children, ...props }: any) => <div {...props}>{children}</div>,
-    img: (strings: TemplateStringsArray, ...args: any[]) => 
-      ({ src, alt, ...props }: any) => <img src={src} alt={alt} {...props} />,
-    h2: (strings: TemplateStringsArray, ...args: any[]) => 
-      ({ children, ...props }: any) => <h2 {...props}>{children}</h2>,
-    p: (strings: TemplateStringsArray, ...args: any[]) => 
-      ({ children, ...props }: any) => <p {...props}>{children}</p>
-  };
-  return {
-    __esModule: true,
-    default: styled,
-    ThemeProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  };
-});
+jest.mock('styled-components', () => ({
+  __esModule: true,
+  default: {
+    section: () => 'section',
+    div: () => 'div',
+    img: () => 'img',
+    h2: () => 'h2',
+    p: () => 'p'
+  },
+  ThemeProvider: ({ children }) => children
+}));
 
 describe('About Component', () => {
   const renderAbout = () => {

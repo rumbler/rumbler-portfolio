@@ -6,7 +6,8 @@ export const Container = styled.section`
   justify-content: center;
   gap: 4rem;
   padding: 8rem 2rem;
-  background: ${props => props.theme.primary};
+  background: ${({ theme }) => theme.background};
+  color: ${({ theme }) => theme.text};
   
   @media (max-width: 900px) {
     flex-direction: column;
@@ -16,23 +17,62 @@ export const Container = styled.section`
 `;
 
 export const ProfileImage = styled.div`
+  position: relative;
   flex-shrink: 0;
   width: 300px;
   height: 300px;
   border-radius: 50%;
   overflow: hidden;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-  border: 3px solid ${props => props.theme.secondary};
   transition: transform 0.3s;
+  background-color: ${({ theme }) => theme.secondaryBackground};
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 50%;
+    padding: 3px;
+    background: linear-gradient(90deg, #4CAF50, #45a049);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
 
   img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
   }
 
   &:hover {
-    transform: scale(1.05);
+    transform: scale(1.1);
+    
+    &::before {
+      opacity: 1;
+    }
+  }
+
+  &.spin {
+    animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(720deg); }
   }
 
   @media (max-width: 900px) {
@@ -43,44 +83,30 @@ export const ProfileImage = styled.div`
 
 export const TextContent = styled.div`
   max-width: 600px;
-
+  
   h2 {
     font-size: 2.5rem;
-    margin-bottom: 1.5rem;
-    color: ${props => props.theme.secondary};
+    margin-bottom: 2rem;
+    color: ${({ theme }) => theme.primary};
   }
-
+  
   p {
     font-size: 1.1rem;
     line-height: 1.6;
-    color: ${props => props.theme.textLight};
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
+    color: ${({ theme }) => theme.text};
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
   }
-
+  
   @media (max-width: 900px) {
     text-align: center;
-
+    
     h2 {
       font-size: 2rem;
+      margin-bottom: 1.5rem;
     }
-
-    p {
-      font-size: 1rem;
-    }
-  }
-`;
-
-export const AboutSection = styled.section`
-  padding: 2rem;
-  background-color: ${({ theme }) => theme.secondaryBackground};
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  text-align: center;
-
-  p {
-    ${({ theme }) => theme.bodyLarge}
-    max-width: 800px;
   }
 `;
