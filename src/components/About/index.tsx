@@ -1,11 +1,35 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Container, ProfileImage, TextContent } from './styles';
 import profileImage from '../../assets/images/profile.jpg';
 
 const About: React.FC = () => {
+  const imageRef = useRef<HTMLDivElement>(null);
+  const clickTimestamps = useRef<number[]>([]);
+  
+  const handleImageClick = () => {
+    const now = Date.now();
+    clickTimestamps.current.push(now);
+    
+    // Remove clicks older than 2 seconds
+    clickTimestamps.current = clickTimestamps.current.filter(
+      timestamp => now - timestamp < 2000
+    );
+    
+    if (clickTimestamps.current.length >= 5) {
+      clickTimestamps.current = [];
+      const element = imageRef.current;
+      if (element) {
+        element.classList.add('spin');
+        element.addEventListener('animationend', () => {
+          element.classList.remove('spin');
+        }, { once: true });
+      }
+    }
+  };
+
   return (
     <Container id="about">
-      <ProfileImage>
+      <ProfileImage ref={imageRef} onClick={handleImageClick}>
         <img src={profileImage} alt="Rumbler Soppa" />
       </ProfileImage>
       <TextContent>
