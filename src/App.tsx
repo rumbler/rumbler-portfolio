@@ -1,43 +1,31 @@
 import React from 'react';
-import { createGlobalStyle } from 'styled-components';
-import { ThemeProvider } from './contexts/ThemeContext';
 import Header from './components/Header';
+import LandingPage from './components/LandingPage';
 import About from './components/About';
 import Skills from './components/Skills';
-import Pipelines from './components/Pipelines';
-import Developer from './components/Developer';
-import Projects from './components/Projects';
 import Contact from './components/Contact';
-
-const GlobalStyle = createGlobalStyle`
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  body {
-    font-family: 'Arial', sans-serif;
-    background-color: ${({ theme }) => theme.background};
-    color: ${({ theme }) => theme.text};
-    line-height: 1.6;
-  }
-`;
+import './styles/globals.css';
 
 function App() {
   return (
-    <ThemeProvider>
-      <GlobalStyle />
+    <div className="min-h-screen bg-dark-bg text-dark-text-primary dark">
       <Header />
-      <main>
-        <Pipelines />
-        <Developer />
-        <Skills />
-        <Projects />
-        <About />
-        <Contact />
+      <div className="h-[70px]" /> {/* Espaçador para o header fixo */}
+      <main className="relative">
+        <section className="min-h-screen">
+          <LandingPage />
+        </section>
+        <section className="min-h-screen">
+          <About />
+        </section>
+        <section className="min-h-screen">
+          <Skills />
+        </section>
+        <section className="min-h-screen">
+          <Contact />
+        </section>
       </main>
-    </ThemeProvider>
+    </div>
   );
 }
 
