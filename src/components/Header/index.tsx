@@ -1,109 +1,92 @@
-import React, { useState, useEffect } from 'react';
-import { HeaderContainer, Logo, NavMenu, NavItem, ThemeToggle, FloatingButton, ThemeSelect } from './styles';
-import { useTheme } from '../../contexts/ThemeContext';
-import { FaSun, FaMoon, FaBars, FaTimes, FaDesktop } from 'react-icons/fa';
+import React, { useState } from 'react';
+import { Link } from 'react-scroll';
+import { FaBars, FaTimes } from 'react-icons/fa';
 
 const Header: React.FC = () => {
-  const { currentMode, setThemeMode } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [showThemeSelect, setShowThemeSelect] = useState(false);
-  const [shouldCollapse, setShouldCollapse] = useState(() => window.innerWidth <= 768);
 
-  useEffect(() => {
-    let resizeTimeout: NodeJS.Timeout;
-
-    const handleResize = () => {
-      if (resizeTimeout) {
-        clearTimeout(resizeTimeout);
-      }
-      resizeTimeout = setTimeout(() => {
-        setShouldCollapse(window.innerWidth <= 768);
-      }, 500);
-    };
-
-    window.addEventListener('resize', handleResize);
-    window.addEventListener('orientationchange', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('orientationchange', handleResize);
-      if (resizeTimeout) {
-        clearTimeout(resizeTimeout);
-      }
-    };
-  }, []);
-
-  const handleMenuClick = () => {
+  const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  const handleNavClick = () => {
+  const closeMenu = () => {
     setIsMenuOpen(false);
   };
 
-  const handleThemeClick = () => {
-    setShowThemeSelect(!showThemeSelect);
-  };
-
-  const handleThemeSelect = (mode: 'light' | 'dark' | 'system') => {
-    setThemeMode(mode);
-    setShowThemeSelect(false);
-  };
-
-  const getThemeIcon = () => {
-    switch (currentMode) {
-      case 'light':
-        return <FaSun />;
-      case 'dark':
-        return <FaMoon />;
-      case 'system':
-        return <FaDesktop />;
-    }
-  };
+  const navLinks = [
+    { name: 'Sobre', to: 'about' },
+    { name: 'Habilidades', to: 'skills' },
+    { name: 'Contato', to: 'contact' }
+  ];
 
   return (
-    <>
-      <HeaderContainer $isOpen={isMenuOpen} $shouldCollapse={shouldCollapse}>
-        <Logo href="/">Rumbler Soppa</Logo>
-        <NavMenu>
-          <NavItem href="#pipelines" onClick={handleNavClick}>Pipelines</NavItem>
-          <NavItem href="#developer" onClick={handleNavClick}>Developer</NavItem>
-          <NavItem href="#skills" onClick={handleNavClick}>Skills</NavItem>
-          <NavItem href="#projects" onClick={handleNavClick}>Projects</NavItem>
-          <NavItem href="#about" onClick={handleNavClick}>About</NavItem>
-          <NavItem href="#contact" onClick={handleNavClick}>Contact</NavItem>
-          <ThemeToggle 
-            onClick={handleThemeClick} 
-            aria-label="Theme selector"
+    <header className="fixed top-0 left-0 w-full bg-zinc-900/95 backdrop-blur-sm shadow-lg shadow-black/10 z-50">
+      {/* Desktop Header */}
+      <div className="container mx-auto px-4 py-[21px]">
+        <div className="flex justify-between items-center">
+          <Link
+            to="home"
+            smooth={true}
+            duration={500}
+            className="cursor-pointer"
           >
-            {getThemeIcon()}
-          </ThemeToggle>
-          {showThemeSelect && (
-            <ThemeSelect>
-              <button onClick={() => handleThemeSelect('light')}>
-                <FaSun /> Light
-              </button>
-              <button onClick={() => handleThemeSelect('dark')}>
-                <FaMoon /> Dark
-              </button>
-              <button onClick={() => handleThemeSelect('system')}>
-                <FaDesktop /> System
-              </button>
-            </ThemeSelect>
-          )}
-        </NavMenu>
-      </HeaderContainer>
-      {shouldCollapse && (
-        <FloatingButton 
-          onClick={handleMenuClick}
-          $isOpen={isMenuOpen}
-          $shouldShow={shouldCollapse}
-          aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-        >
-          {isMenuOpen ? <FaTimes /> : <FaBars />}
-        </FloatingButton>
-      )}
-    </>
+            <h1 className="text-2xl font-bold text-white transition-colors duration-300 hover:text-primary">
+              Rumbler Soppa
+            </h1>
+          </Link>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex space-x-6">
+            {navLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                smooth={true}
+                duration={500}
+                offset={-70}
+                className="text-zinc-300 hover:text-primary transition-colors duration-300 
+                          cursor-pointer relative group"
+              >
+                {link.name}
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary 
+                               transition-all duration-300 group-hover:w-full" />
+              </Link>
+            ))}
+          </nav>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={toggleMenu}
+            className="md:hidden text-white text-2xl focus:outline-none"
+            aria-label="Toggle menu"
+          >
+            {isMenuOpen ? <FaTimes /> : <FaBars />}
+          </button>
+        </div>
+
+        {/* Mobile Navigation */}
+        {isMenuOpen && (
+          <nav className="md:hidden pt-4 pb-2">
+            <div className="flex flex-col space-y-4">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  smooth={true}
+                  duration={500}
+                  offset={-70}
+                  onClick={closeMenu}
+                  className="text-zinc-300 hover:text-primary transition-colors duration-300 
+                            cursor-pointer text-center"
+                >
+                  {link.name}
+                </Link>
+              ))}
+            </div>
+          </nav>
+        )}
+      </div>
+    </header>
   );
 };
 

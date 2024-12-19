@@ -1,222 +1,136 @@
 # CI/CD Pipeline
 
-This document describes the CI/CD rules and workflow for the project.
+## Ambientes
 
-## Execution Rules
+### Development (Desenvolvimento)
 
-### Continuous Integration (CI)
+- **Branch**: `development`
+- **URL**: `dev.example-portfolio.com`
+- **Porta**: `3001`
+- **Recursos**:
+  - CPU Limit: 0.5
+  - Memory Limit: 256M
+  - CPU Reserve: 0.25
+  - Memory Reserve: 128M
 
-CI should be executed in the following situations:
+### Release (Homologação)
 
-1. **Feature Branch Pushes:**
-   - `feat/*`
-   - `fix/*`
-   - `docs/*`
-   - `style/*`
-   - `refactor/*`
-   - `test/*`
-   - `chore/*`
+- **Branch**: `main`
+- **URL**: `release.example-portfolio.com`
+- **Porta**: `3002`
+- **Recursos**:
+  - CPU Limit: 0.75
+  - Memory Limit: 384M
+  - CPU Reserve: 0.5
+  - Memory Reserve: 256M
 
-2. **Pull Requests:**
-   - From feature branches to `development`
-   - From `development` to `main`
+### Production (Produção)
 
-### Continuous Deployment (CD)
+- **Trigger**: Tags `v[0-9]+.[0-9]+.[0-9]+`
+- **URL**: `example-portfolio.com`
+- **Porta**: `3000`
+- **Recursos**:
+  - CPU Limit: 1.0
+  - Memory Limit: 512M
+  - CPU Reserve: 0.75
+  - Memory Reserve: 384M
 
-CD is divided into three environments:
+## Fluxo de Deploy
 
-1. **Development Environment:**
-   - Triggered when feature branch PRs are merged to `development`
-   - Uses CI-generated artifact
-   - Docker image tag: `development`
-   - Port: 3001
-   - Resources:
-     - CPU Limit: 0.5
-     - Memory Limit: 256M
-     - CPU Reserve: 0.25
-     - Memory Reserve: 128M
-
-2. **Release Environment:**
-   - Triggered when `development` PR is merged to `main`
-   - Uses CI-generated artifact
-   - Docker image tag: `release`
-   - Port: 3002
-   - Resources:
-     - CPU Limit: 0.75
-     - Memory Limit: 384M
-     - CPU Reserve: 0.5
-     - Memory Reserve: 256M
-
-3. **Production Environment:**
-   - Triggered when a `v*` tag is pushed to `main`
-   - Uses Nexus artifact from release
-   - Docker image tags: `latest` and specific version
-   - Port: 3000
-   - Resources:
-     - CPU Limit: 1
-     - Memory Limit: 512M
-     - CPU Reserve: 0.75
-     - Memory Reserve: 384M
-
-### When NOT to Execute CI/CD
-
-CI/CD should not be executed in these cases:
-
-1. Direct pushes to main branches:
-   - `main` (blocked)
-   - `development` (blocked)
-
-2. Commits in already open PRs (CI already executed)
-
-3. Changes only in non-code files:
-   - `.md`
-   - `.txt`
-   - `.gitignore`
-   - etc.
-
-4. PRs with status:
-   - Closed
-   - Draft
-   - Not following naming convention
-
-## Docker Compose Architecture
-
-The project uses a unified Docker Compose architecture where all environments are defined in a single `docker-compose.yml` file:
-
-1. **Service Names:**
-   - `portfolio-development`
-   - `portfolio-release`
-   - `portfolio-production`
-
-2. **Network:**
-   - All services share the same network `portfolio-net`
-   - Bridge driver for local deployment
-
-3. **Environment Variables:**
-   Each environment has its own prefixed variables:
-   - Development: `DEV_*`
-   - Release: `RELEASE_*`
-   - Production: `PROD_*`
-
-4. **Container Naming:**
-   - Development: `rumbler-portfolio-development-{version}`
-   - Release: `rumbler-portfolio-release-{version}`
-   - Production: `rumbler-portfolio-production-{version}`
-
-## Artifact Flow
-
-1. **CI Build:**
-   - Generates application artifact
-   - Uploads to Nexus Repository with environment-specific paths:
-     - `/development/{version}.zip`
-     - `/release/rc-{version}.zip`
-     - `/production/v{version}.zip`
-
-2. **CD Development:**
-   - Downloads CI artifact from `/development/{version}.zip`
-   - Builds Docker image
-   - Tags as `development` and `{version}`
-   - Deploys to `portfolio-development` service
-
-3. **CD Release:**
-   - Downloads CI artifact from `/release/rc-{version}.zip`
-   - Builds Docker image
-   - Tags as `release` and `rc-{version}`
-   - Deploys to `portfolio-release` service
-
-4. **CD Production:**
-   - Downloads release artifact from `/production/v{version}.zip`
-   - Builds Docker image
-   - Tags as `latest` and `v{version}`
-   - Deploys to `portfolio-production` service
-
-## Pipeline Flow
+### 1. Development
 
 ```mermaid
-graph TD
-    A[Feature Branch] -->|Push| B[CI Build]
-    B -->|Success| C[Nexus Artifact]
-    
-    D[PR to Development] -->|Merge| E[Development Deploy]
-    E -->|Pull| C
-    E -->|Push| F[Docker Registry]
-    F -->|Deploy| G[portfolio-development]
-    
-    H[PR to Main] -->|Merge| I[Release Deploy]
-    I -->|Pull| C
-    I -->|Push| F
-    F -->|Deploy| J[portfolio-release]
-    
-    K[Tag v*] -->|Push| L[Production Deploy]
-    L -->|Pull| C
-    L -->|Push| F
-    F -->|Deploy| M[portfolio-production]
+graph LR
+    A[Push branch development] --> B[Build]
+    B --> C[Test]
+    C --> D[Deploy to dev]
+    D --> E[dev.example-portfolio.com]
 ```
 
-## Environment Variables
+1. Push para branch `development`
+2. Build da aplicação
+3. Download do build do Nexus
+4. Build da imagem Docker
+5. Push para registry com tag `development`
+6. Deploy no ambiente de desenvolvimento
 
-### Required Secrets
+### 2. Release
 
-- `NEXUS_USERNAME`: Nexus user
-- `NEXUS_PASSWORD`: Nexus password
-- `NEXUS_URL`: Nexus Repository URL
-- `NEXUS_REPOSITORY`: Nexus repository name
-- `REGISTRY_URL`: Docker Registry URL
+```mermaid
+graph LR
+    A[Push branch main] --> B[Build]
+    B --> C[Test]
+    C --> D[Deploy to release]
+    D --> E[release.example-portfolio.com]
+```
 
-### Environment-Specific Variables
+1. Push para branch `main`
+2. Build da aplicação
+3. Download do build do Nexus
+4. Build da imagem Docker
+5. Push para registry com tag `release`
+6. Deploy no ambiente de homologação
 
-1. **Development:**
-   - `DEV_PORT`: 3001
-   - `DEV_CPU_LIMIT`: 0.5
-   - `DEV_MEMORY_LIMIT`: 256M
-   - `DEV_CPU_RESERVE`: 0.25
-   - `DEV_MEMORY_RESERVE`: 128M
-   - `DEV_IMAGE_TAG`: {version}
+### 3. Production
 
-2. **Release:**
-   - `RELEASE_PORT`: 3002
-   - `RELEASE_CPU_LIMIT`: 0.75
-   - `RELEASE_MEMORY_LIMIT`: 384M
-   - `RELEASE_CPU_RESERVE`: 0.5
-   - `RELEASE_MEMORY_RESERVE`: 256M
-   - `RELEASE_IMAGE_TAG`: rc-{version}
+```mermaid
+graph LR
+    A[Tag v*.*.* push] --> B[Build]
+    B --> C[Test]
+    C --> D[Deploy to prod]
+    D --> E[example-portfolio.com]
+```
 
-3. **Production:**
-   - `PROD_PORT`: 3000
-   - `PROD_CPU_LIMIT`: 1
-   - `PROD_MEMORY_LIMIT`: 512M
-   - `PROD_CPU_RESERVE`: 0.75
-   - `PROD_MEMORY_RESERVE`: 384M
-   - `PROD_IMAGE_TAG`: v{version}
+1. Push de tag com padrão `v*.*.*`
+2. Build da aplicação
+3. Download do build do Nexus
+4. Build da imagem Docker
+5. Push para registry com tags `latest` e versão
+6. Deploy no ambiente de produção
 
-## Manual Deployment
+## Secrets
 
-All environments support manual deployment through GitHub Actions `workflow_dispatch`, allowing version specification for deployment.
+### Development
 
-## Troubleshooting
+- `DEV_DOMAIN`: URL do ambiente de desenvolvimento
+- `NEXUS_CREDENTIALS`: Credenciais do Nexus
+- `REGISTRY_CREDENTIALS`: Credenciais do registry
 
-### Common Issues
+### Release
 
-1. **CI Build Failure**
-   - Verify test failures in GitHub Actions logs
-   - Check if all dependencies are installed
-   - Ensure environment variables are set
+- `RELEASE_DOMAIN`: URL do ambiente de homologação
+- `NEXUS_CREDENTIALS`: Credenciais do Nexus
+- `REGISTRY_CREDENTIALS`: Credenciais do registry
 
-2. **Deployment Issues**
-   - Check if Nexus artifact exists
-   - Verify Docker Registry connectivity
-   - Validate environment variables
-   - Check container logs
+### Production
 
-3. **Environment Access**
-   - Development: Port 3001
-   - Release: Port 3002
-   - Production: Port 3000
+- `PRODUCTION_DOMAIN`: URL do ambiente de produção
+- `NEXUS_CREDENTIALS`: Credenciais do Nexus
+- `REGISTRY_CREDENTIALS`: Credenciais do registry
 
-### Support
+## Notas Importantes
 
-For deployment issues:
+1. **Segurança**:
+   - Nunca commite secrets no repositório
+   - Use GitHub Secrets para armazenar informações sensíveis
+   - Configure as variáveis de ambiente no pipeline
 
-1. Check GitHub Actions logs
-2. Verify Nexus Repository
-3. Contact your DevOps team
+2. **Versionamento**:
+   - Development: SHA do commit (7 caracteres)
+   - Release: `rc-{SHA do commit}`
+   - Production: Tag semântica `v*.*.*`
+
+3. **Zero Downtime**:
+   - Todos os deploys são feitos com rolling update
+   - Imagens são baixadas antes do deploy
+   - Healthcheck é executado antes de finalizar o deploy
+
+4. **Recursos**:
+   - Cada ambiente tem recursos específicos
+   - Monitoramento de recursos via Docker
+   - Alertas configurados para uso de recursos
+
+5. **Rollback**:
+   - Possível via redeploy de versão anterior
+   - Imagens mantidas no registry
+   - Tags preservadas para referência

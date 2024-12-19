@@ -27,6 +27,7 @@ jobs:
     env:
       NODE_ENV: production
       PORT: 3000
+      PRODUCTION_DOMAIN: ${{ secrets.PRODUCTION_DOMAIN }}
       DOCKER_CPU_LIMIT: 1
       DOCKER_MEMORY_LIMIT: 512M
       DOCKER_CPU_RESERVE: 0.75
@@ -85,6 +86,7 @@ jobs:
           PROD_MEMORY_LIMIT: 512M
           PROD_CPU_RESERVE: 0.75
           PROD_MEMORY_RESERVE: 384M
+          PRODUCTION_DOMAIN: ${{ secrets.PRODUCTION_DOMAIN }}
         run: |
           # Login no Docker Registry
           echo "$NEXUS_PASS" | docker login $REGISTRY_URL -u "$NEXUS_USERNAME" --password-stdin
@@ -93,4 +95,12 @@ jobs:
           docker compose pull portfolio-production
           
           # Rolling update - zero downtime
-          docker compose up -d --no-deps --build --force-recreate --remove-orphans portfolio-production
+          docker compose up -d \
+            --no-deps \
+            --build \
+            --force-recreate \
+            --remove-orphans \
+            -e NODE_ENV=production \
+            -e PORT=3000 \
+            -e PRODUCTION_DOMAIN=$PRODUCTION_DOMAIN \
+            portfolio-production

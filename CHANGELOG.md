@@ -1,3 +1,13 @@
+## [Unreleased]
+
+### Removed
+- Componente Pipelines removido completamente do projeto
+- Referências a Pipelines removidas de testes e componentes relacionados
+
+### Changed
+- Atualização da seção de Habilidades com novas tecnologias e categorias
+- Simplificação da estrutura de navegação e componentes
+
 
 ## [1.2.2] - 2024-12-10
 

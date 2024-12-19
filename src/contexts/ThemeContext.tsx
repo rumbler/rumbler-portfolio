@@ -1,62 +1,69 @@
-import React, { createContext, useState, useContext, useCallback, useEffect } from 'react';
-import { ThemeProvider as StyledThemeProvider } from 'styled-components';
-import { lightTheme, darkTheme } from '../styles/themes';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 
 type ThemeMode = 'light' | 'dark' | 'system';
 
-interface ThemeContextData {
-  theme: typeof lightTheme;
-  currentMode: ThemeMode;
+interface ThemeContextType {
   isDarkMode: boolean;
+  currentMode: ThemeMode;
   setThemeMode: (mode: ThemeMode) => void;
 }
 
-const ThemeContext = createContext<ThemeContextData>({} as ThemeContextData);
-
-const THEME_STORAGE_KEY = '@RumblerPortfolio:theme';
+const ThemeContext = createContext<ThemeContextType>({
+  isDarkMode: false,
+  currentMode: 'system',
+  setThemeMode: () => {},
+});
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentMode, setCurrentMode] = useState<ThemeMode>(() => {
-    const storedTheme = localStorage.getItem(THEME_STORAGE_KEY) as ThemeMode | null;
-    return storedTheme || 'system';
+    const savedMode = localStorage.getItem('theme') as ThemeMode;
+    return savedMode || 'system';
   });
 
-  const [systemPrefersDark, setSystemPrefersDark] = useState(() => 
-    window.matchMedia('(prefers-color-scheme: dark)').matches
-  );
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    if (currentMode === 'system') {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    return currentMode === 'dark';
+  });
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     
-    const handleChange = (e: MediaQueryListEvent) => {
-      setSystemPrefersDark(e.matches);
+    const handleChange = () => {
+      if (currentMode === 'system') {
+        setIsDarkMode(mediaQuery.matches);
+      }
     };
 
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
-  }, []);
+  }, [currentMode]);
 
-  const isDarkMode = currentMode === 'system' 
-    ? systemPrefersDark 
-    : currentMode === 'dark';
+  useEffect(() => {
+    if (currentMode === 'system') {
+      setIsDarkMode(window.matchMedia('(prefers-color-scheme: dark)').matches);
+    } else {
+      setIsDarkMode(currentMode === 'dark');
+    }
+  }, [currentMode]);
 
-  const setThemeMode = useCallback((mode: ThemeMode) => {
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
+
+  const setThemeMode = (mode: ThemeMode) => {
     setCurrentMode(mode);
-    localStorage.setItem(THEME_STORAGE_KEY, mode);
-  }, []);
-
-  const theme = isDarkMode ? darkTheme : lightTheme;
+    localStorage.setItem('theme', mode);
+  };
 
   return (
-    <ThemeContext.Provider value={{ 
-      theme, 
-      currentMode,
-      isDarkMode, 
-      setThemeMode 
-    }}>
-      <StyledThemeProvider theme={theme}>
-        {children}
-      </StyledThemeProvider>
+    <ThemeContext.Provider value={{ isDarkMode, currentMode, setThemeMode }}>
+      {children}
     </ThemeContext.Provider>
   );
 };
