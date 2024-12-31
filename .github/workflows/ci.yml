@@ -15,7 +15,38 @@ on:
       - "main"
 
 jobs:
+  set-version-and-environment:
+    runs-on: self-hosted
+    if: |
+      github.event_name == 'push' && (github.ref == 'refs/heads/development' || github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      environment: ${{ steps.version.outputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set Version and Environment
+        id: version
+        run: |
+          if [[ $GITHUB_EVENT_NAME == 'push' ]]; then
+            if [[ $GITHUB_REF == 'refs/heads/development' ]]; then
+              VERSION=$(git rev-parse --short HEAD)
+              ENVIRONMENT="development"
+            elif [[ $GITHUB_REF == refs/tags/* ]]; then
+              VERSION=${GITHUB_REF#refs/tags/}
+              ENVIRONMENT="production"
+            elif [[ $GITHUB_REF == 'refs/heads/main' ]]; then
+              VERSION="v$(git rev-parse --short HEAD)"
+              ENVIRONMENT="release"
+            fi
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
+
   build-and-test:
+    needs: set-version-and-environment
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
@@ -27,7 +58,7 @@ jobs:
         with:
           node-version: 20.10.0
 
-      - uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v4
         with:
           version: 8
       
@@ -53,41 +84,10 @@ jobs:
           zip -r ../build.zip .
           cd ..
 
-      - name: Set Version and Environment
-        id: version
-        if: |
-          github.event_name == 'push' && (github.ref == 'refs/heads/development' || github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
-        run: |
-          if [[ $GITHUB_EVENT_NAME == 'push' ]]; then
-            if [[ $GITHUB_REF == 'refs/heads/development' ]]; then
-              VERSION=$(git rev-parse --short HEAD)
-              ENVIRONMENT="development"
-            elif [[ $GITHUB_REF == refs/tags/* ]]; then
-              VERSION=${GITHUB_REF#refs/tags/}
-              if [[ $VERSION == *-rc.* ]]; then
-                ENVIRONMENT="release-candidate"
-              else
-                ENVIRONMENT="production"
-              fi
-            elif [[ $GITHUB_REF == 'refs/heads/main' ]]; then
-              VERSION="v$(git rev-parse --short HEAD)"
-              ENVIRONMENT="release"
-            fi
-          fi
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
-
-      - name: Upload Artifact
-        if: |
-          github.event_name == 'push' && (github.ref == 'refs/heads/development' || github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
-        uses: actions/upload-artifact@v3
-        with:
-          name: build-artifact
-          path: build.zip
-          retention-days: 1
-
   upload-to-nexus:
-    needs: build-and-test
+    needs: 
+      - set-version-and-environment
+      - build-and-test
     runs-on: self-hosted
     if: |
       github.event_name == 'push' && (github.ref == 'refs/heads/development' || github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
@@ -95,33 +95,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Download Artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: build-artifact
-
-      - name: Set Version and Environment
-        id: version
-        run: |
-          if [[ $GITHUB_EVENT_NAME == 'push' ]]; then
-            if [[ $GITHUB_REF == 'refs/heads/development' ]]; then
-              VERSION=$(git rev-parse --short HEAD)
-              ENVIRONMENT="development"
-            elif [[ $GITHUB_REF == refs/tags/* ]]; then
-              VERSION=${GITHUB_REF#refs/tags/}
-              if [[ $VERSION == *-rc.* ]]; then
-                ENVIRONMENT="release-candidate"
-              else
-                ENVIRONMENT="production"
-              fi
-            elif [[ $GITHUB_REF == 'refs/heads/main' ]]; then
-              VERSION="rc-$(git rev-parse --short HEAD)"
-              ENVIRONMENT="release"
-            fi
-          fi
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
 
       - name: Upload to Nexus
         env:
@@ -131,4 +104,4 @@ jobs:
         run: |
           curl -u "${{ secrets.NEXUS_USERNAME }}:$NEXUS_PASS" \
             --upload-file build.zip \
-            "${NEXUS_URL}/repository/${NEXUS_REPO}/${{ github.event.repository.name }}/${{ steps.version.outputs.environment }}/${{ steps.version.outputs.version }}.zip"
+            "${NEXUS_URL}/repository/${NEXUS_REPO}/${{ github.event.repository.name }}/${{ needs.set-version-and-environment.outputs.environment }}/${{ needs.set-version-and-environment.outputs.version }}.zip"

@@ -1,4 +1,4 @@
-name: Development CD
+name: Continuous Deployment to Development Environment
 
 on:
   push:
@@ -13,9 +13,28 @@ permissions:
   deployments: write
 
 jobs:
+  set-version-and-environment:
+    runs-on: self-hosted
+    if: github.event_name == 'push' && github.ref == 'refs/heads/development'
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      environment: ${{ steps.version.outputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set Version and Environment
+        id: version
+        run: |
+          VERSION=$(git rev-parse --short HEAD)
+          ENVIRONMENT="development"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
+
   deploy-development:
+    needs: set-version-and-environment
     name: Deploy to Development
-    if: github.ref == 'refs/heads/development'
     runs-on: self-hosted
     environment: development
     env:
@@ -32,16 +51,6 @@ jobs:
         with:
           fetch-depth: 0
       
-      - name: Get version and environment
-        id: get_version
-        run: |
-          if [[ $GITHUB_REF == 'refs/heads/development' ]]; then
-            VERSION=$(git rev-parse --short HEAD)
-            ENVIRONMENT="development"
-          fi
-          echo "version=${VERSION}" >> $GITHUB_OUTPUT
-          echo "environment=${ENVIRONMENT}" >> $GITHUB_OUTPUT
-      
       - name: Download build from Nexus
         env:
           NEXUS_PASS: ${{ secrets.NEXUS_PASSWORD }}
@@ -49,7 +58,7 @@ jobs:
           NEXUS_REPO: ${{ secrets.NEXUS_REPOSITORY }}
         run: |
           mkdir -p build
-          VERSION=${{ github.event.inputs.version || steps.get_version.outputs.version }}
+          VERSION=${{ needs.set-version-and-environment.outputs.version }}
           curl -u "${{ secrets.NEXUS_USERNAME }}:$NEXUS_PASS" \
             -o build.zip \
             "${NEXUS_URL}/repository/${NEXUS_REPO}/${{ github.event.repository.name }}/development/${VERSION}.zip"
@@ -64,7 +73,7 @@ jobs:
           # Login no Docker Registry
           echo "$NEXUS_PASS" | docker login $REGISTRY_URL -u "$NEXUS_USERNAME" --password-stdin
           
-          VERSION=${{ steps.version.outputs.version }}
+          VERSION=${{ needs.set-version-and-environment.outputs.version }}
           docker build -t ${REGISTRY_URL}/${{ github.event.repository.name }}:${VERSION} .
           docker push ${REGISTRY_URL}/${{ github.event.repository.name }}:${VERSION}
           
@@ -74,7 +83,7 @@ jobs:
 
       - name: Deploy to Development
         env:
-          DEV_IMAGE_TAG: ${{ steps.version.outputs.version }}
+          DEV_IMAGE_TAG: ${{ needs.set-version-and-environment.outputs.version }}
           REGISTRY_URL: ${{ secrets.REGISTRY_URL }}
           NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           NEXUS_PASS: ${{ secrets.NEXUS_PASSWORD }}
