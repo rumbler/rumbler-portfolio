@@ -32,12 +32,15 @@ jobs:
         with:
           fetch-depth: 0
       
-      - name: Get version from commit
-        id: get_version
+      - name: Get version and environment
+        id: version
         run: |
-          COMMIT_SHA=${{ github.sha }}
-          VERSION="${COMMIT_SHA:0:7}"
+          if [[ $GITHUB_REF == 'refs/heads/development' ]]; then
+            VERSION=$(git rev-parse --short HEAD)
+            ENVIRONMENT="development"
+          fi
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "environment=${ENVIRONMENT}" >> $GITHUB_OUTPUT
       
       - name: Download build from Nexus
         env:
@@ -46,10 +49,11 @@ jobs:
           NEXUS_REPO: ${{ secrets.NEXUS_REPOSITORY }}
         run: |
           mkdir -p build
-          VERSION=${{ github.event.inputs.version || steps.get_version.outputs.version }}
+          VERSION=${{ steps.version.outputs.version }}
+          ENVIRONMENT=${{ steps.version.outputs.environment }}
           curl -u "${{ secrets.NEXUS_USERNAME }}:$NEXUS_PASS" \
             -o build.zip \
-            "${NEXUS_URL}/repository/${NEXUS_REPO}/${{ github.event.repository.name }}/development/${VERSION}.zip"
+            "${NEXUS_URL}/repository/${NEXUS_REPO}/${{ github.event.repository.name }}/${ENVIRONMENT}/${VERSION}.zip"
           unzip build.zip -d build/
 
       - name: Build and push Docker image
@@ -61,7 +65,7 @@ jobs:
           # Login no Docker Registry
           echo "$NEXUS_PASS" | docker login $REGISTRY_URL -u "$NEXUS_USERNAME" --password-stdin
           
-          VERSION=${{ github.event.inputs.version || steps.get_version.outputs.version }}
+          VERSION=${{ steps.version.outputs.version }}
           docker build -t ${REGISTRY_URL}/${{ github.event.repository.name }}:${VERSION} .
           docker push ${REGISTRY_URL}/${{ github.event.repository.name }}:${VERSION}
           
@@ -71,7 +75,7 @@ jobs:
 
       - name: Deploy to Development
         env:
-          DEV_IMAGE_TAG: ${{ github.event.inputs.version || steps.get_version.outputs.version }}
+          DEV_IMAGE_TAG: ${{ steps.version.outputs.version }}
           REGISTRY_URL: ${{ secrets.REGISTRY_URL }}
           NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           NEXUS_PASS: ${{ secrets.NEXUS_PASSWORD }}
