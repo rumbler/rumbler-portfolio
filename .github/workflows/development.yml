@@ -56,12 +56,13 @@ jobs:
           NEXUS_PASS: ${{ secrets.NEXUS_PASSWORD }}
           NEXUS_URL: ${{ secrets.NEXUS_URL }}
           NEXUS_REPO: ${{ secrets.NEXUS_REPOSITORY }}
+          REPOSITORY_NAME: ${{ secrets.REPOSITORY_NAME }}
         run: |
           mkdir -p build
           VERSION=${{ needs.set-version-and-environment.outputs.version }}
           curl -u "${{ secrets.NEXUS_USERNAME }}:$NEXUS_PASS" \
             -o build.zip \
-            "${NEXUS_URL}/repository/${NEXUS_REPO}/${{ github.event.repository.name }}/development/${VERSION}.zip"
+            "${NEXUS_URL}/repository/${NEXUS_REPO}/${REPOSITORY_NAME}/development/${VERSION}.zip"
           unzip build.zip -d build/
 
       - name: Build and push Docker image
@@ -69,17 +70,18 @@ jobs:
           REGISTRY_URL: ${{ secrets.REGISTRY_URL }}
           NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           NEXUS_PASS: ${{ secrets.NEXUS_PASSWORD }}
+          REPOSITORY_NAME: ${{ secrets.REPOSITORY_NAME }}
         run: |
           # Login no Docker Registry
           echo "$NEXUS_PASS" | docker login $REGISTRY_URL -u "$NEXUS_USERNAME" --password-stdin
           
           VERSION=${{ needs.set-version-and-environment.outputs.version }}
-          docker build -t ${REGISTRY_URL}/${{ github.event.repository.name }}:${VERSION} .
-          docker push ${REGISTRY_URL}/${{ github.event.repository.name }}:${VERSION}
+          docker build -t ${REGISTRY_URL}/${REPOSITORY_NAME}:${VERSION} .
+          docker push ${REGISTRY_URL}/${REPOSITORY_NAME}:${VERSION}
           
           # Tag as development
-          docker tag ${REGISTRY_URL}/${{ github.event.repository.name }}:${VERSION} ${REGISTRY_URL}/${{ github.event.repository.name }}:development
-          docker push ${REGISTRY_URL}/${{ github.event.repository.name }}:development
+          docker tag ${REGISTRY_URL}/${REPOSITORY_NAME}:${VERSION} ${REGISTRY_URL}/${REPOSITORY_NAME}:development
+          docker push ${REGISTRY_URL}/${REPOSITORY_NAME}:development
 
       - name: Deploy to Development
         env:
@@ -93,6 +95,7 @@ jobs:
           DEV_CPU_RESERVE: 0.25
           DEV_MEMORY_RESERVE: 128M
           PRODUCTION_DOMAIN: ${{ secrets.DEV_DOMAIN }}
+          REPOSITORY_NAME: ${{ secrets.REPOSITORY_NAME }}
         run: |
           # Login no Docker Registry
           echo "$NEXUS_PASS" | docker login $REGISTRY_URL -u "$NEXUS_USERNAME" --password-stdin
