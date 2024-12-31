@@ -21,6 +21,7 @@ jobs:
     env:
       NODE_ENV: release
       PORT: 3002
+      PRODUCTION_DOMAIN: ${{ secrets.RELEASE_DOMAIN }}
       DOCKER_CPU_LIMIT: 0.75
       DOCKER_MEMORY_LIMIT: 384M
       DOCKER_CPU_RESERVE: 0.5
@@ -81,6 +82,7 @@ jobs:
           RELEASE_MEMORY_LIMIT: 384M
           RELEASE_CPU_RESERVE: 0.5
           RELEASE_MEMORY_RESERVE: 256M
+          PRODUCTION_DOMAIN: ${{ secrets.RELEASE_DOMAIN }}
         run: |
           # Login no Docker Registry
           echo "$NEXUS_PASS" | docker login $REGISTRY_URL -u "$NEXUS_USERNAME" --password-stdin
@@ -89,4 +91,12 @@ jobs:
           docker compose pull portfolio-release
           
           # Rolling update - zero downtime
-          docker compose up -d --no-deps --build --force-recreate --remove-orphans portfolio-release
+          docker compose up -d \
+            --no-deps \
+            --build \
+            --force-recreate \
+            --remove-orphans \
+            -e NODE_ENV=release \
+            -e PORT=3002 \
+            -e PRODUCTION_DOMAIN=$PRODUCTION_DOMAIN \
+            portfolio-release

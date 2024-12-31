@@ -1,0 +1,26 @@
+{
+  "presets": [
+    ["@babel/preset-env", {
+      "targets": {
+        "node": "current",
+        "browsers": [">0.2%", "not dead", "not op_mini all"]
+      },
+      "useBuiltIns": "usage",
+      "corejs": 3
+    }],
+    ["@babel/preset-react", {
+      "runtime": "automatic"
+    }],
+    ["@babel/preset-typescript", {
+      "isTSX": true,
+      "allExtensions": true
+    }]
+  ],
+  "plugins": [
+    ["@babel/plugin-transform-runtime", {
+      "corejs": 3,
+      "helpers": true,
+      "regenerator": true
+    }]
+  ]
+}

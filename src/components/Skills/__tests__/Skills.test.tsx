@@ -1,89 +1,170 @@
+import React from 'react';
 import { render, screen } from '@testing-library/react';
-import Skills from '../index';
+import Skills from '..';
+
+// Mock ThemeProvider
+const MockThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <div data-testid="mock-theme-provider">{children}</div>
+);
 
 // Mock react-icons/fa
 jest.mock('react-icons/fa', () => ({
-  FaAws: () => <svg data-testid="icon-aws" />,
-  FaDocker: () => <svg data-testid="icon-docker" />,
-  FaJenkins: () => <svg data-testid="icon-jenkins" />,
-  FaGithub: () => <svg data-testid="icon-github" />
+  FaPython: () => <svg data-testid="icon-python" />,
+  FaNodeJs: () => <svg data-testid="icon-nodejs" />,
+  FaTerminal: () => <svg data-testid="icon-terminal" />,
+  FaBook: () => <svg data-testid="icon-book" />,
+  FaBrain: () => <svg data-testid="icon-brain" />,
+  FaLaptopCode: () => <svg data-testid="icon-laptop-code" />,
+  FaCloudscale: () => <svg data-testid="icon-cloudscale" />
 }));
 
 // Mock react-icons/si
 jest.mock('react-icons/si', () => ({
-  SiKubernetes: () => <svg data-testid="icon-kubernetes" />,
-  SiTerraform: () => <svg data-testid="icon-terraform" />
+  SiGooglecloud: () => <svg data-testid="icon-googlecloud" />,
+  SiAmazon: () => <svg data-testid="icon-amazon" />,
+  SiCloudflare: () => <svg data-testid="icon-cloudflare" />,
+  SiDigitalocean: () => <svg data-testid="icon-digitalocean" />,
+  SiDocker: () => <svg data-testid="icon-docker" />,
+  SiTerraform: () => <svg data-testid="icon-terraform" />,
+  SiJenkins: () => <svg data-testid="icon-jenkins" />,
+  SiGrafana: () => <svg data-testid="icon-grafana" />,
+  SiPrometheus: () => <svg data-testid="icon-prometheus" />,
+  SiElasticsearch: () => <svg data-testid="icon-elasticsearch" />,
+  SiLinux: () => <svg data-testid="icon-linux" />,
+  SiCplusplus: () => <svg data-testid="icon-cplusplus" />
 }));
 
-// Mock styled-components
-jest.mock('styled-components', () => {
-  const styled = {
-    section: () => ({ children, ...props }: any) => <section {...props}>{children}</section>,
-    div: () => ({ children, ...props }: any) => <div {...props}>{children}</div>,
-    article: () => ({ children, ...props }: any) => <article {...props}>{children}</article>,
-    h2: () => ({ children, ...props }: any) => <h2 {...props}>{children}</h2>,
-    h3: () => ({ children, ...props }: any) => <h3 {...props}>{children}</h3>,
-    p: () => ({ children, ...props }: any) => <p {...props}>{children}</p>
-  };
-
-  styled.section.attrs = () => styled.section;
-  styled.div.attrs = () => styled.div;
-  styled.article.attrs = () => styled.article;
-  styled.h2.attrs = () => styled.h2;
-  styled.h3.attrs = () => styled.h3;
-  styled.p.attrs = () => styled.p;
-
+// Mock localStorage
+const localStorageMock = (() => {
+  let store: { [key: string]: string } = {};
   return {
-    __esModule: true,
-    default: styled,
-    ThemeProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    getItem: jest.fn((key: string) => store[key] || null),
+    setItem: jest.fn((key: string, value: string) => {
+      store[key] = value.toString();
+    }),
+    clear: jest.fn(() => {
+      store = {};
+    }),
+    removeItem: jest.fn((key: string) => {
+      delete store[key];
+    }),
   };
+})();
+
+Object.defineProperty(window, 'localStorage', {
+  value: localStorageMock
+});
+
+// Mock window.matchMedia
+const matchMediaMock = jest.fn().mockImplementation(query => ({
+  matches: false,
+  media: query,
+  onchange: null,
+  addListener: jest.fn(), 
+  removeListener: jest.fn(), 
+  addEventListener: jest.fn(),
+  removeEventListener: jest.fn(),
+  dispatchEvent: jest.fn(),
+}));
+
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: matchMediaMock
 });
 
 describe('Skills Component', () => {
-  const renderSkills = () => {
-    return render(<Skills />);
-  };
-
-  it('should render the "Skills" heading', () => {
-    renderSkills();
-    const heading = screen.getByText('Skills');
-    expect(heading).toBeInTheDocument();
-    expect(heading.tagName).toBe('H2');
+  beforeEach(() => {
+    // Limpar mocks antes de cada teste
+    localStorageMock.getItem.mockClear();
+    localStorageMock.setItem.mockClear();
+    matchMediaMock.mockClear();
   });
 
-  it('should render all skill cards with correct titles', () => {
-    renderSkills();
-    const expectedSkills = [
-      'AWS',
-      'Docker',
-      'Kubernetes',
-      'Terraform',
-      'Jenkins',
-      'GitHub Actions'
+  it('renders without crashing', () => {
+    render(
+      <MockThemeProvider>
+        <Skills />
+      </MockThemeProvider>
+    );
+    
+    expect(screen.getByText('Minhas Habilidades')).toBeInTheDocument();
+  });
+
+  it('displays all skill sections', () => {
+    render(
+      <MockThemeProvider>
+        <Skills />
+      </MockThemeProvider>
+    );
+    
+    // Verifica seções de habilidades
+    const sections = [
+      'Cloud Computing', 
+      'DevOps', 
+      'Observabilidade', 
+      'Infraestrutura', 
+      'Desenvolvimento', 
+      'Abordagem Técnica'
     ];
 
-    expectedSkills.forEach(skillTitle => {
-      const skillElement = screen.getByText(skillTitle);
-      expect(skillElement).toBeInTheDocument();
+    sections.forEach(section => {
+      expect(screen.getByText(section)).toBeInTheDocument();
     });
   });
 
-  it('should render all skill icons', () => {
-    const { container } = renderSkills();
-    const icons = container.querySelectorAll('[data-testid^="icon-"]');
-    expect(icons).toHaveLength(6);
+  it('displays cloud skills', () => {
+    render(
+      <MockThemeProvider>
+        <Skills />
+      </MockThemeProvider>
+    );
+    
+    const cloudSkills = [
+      'Google Cloud', 
+      'AWS', 
+      'Cloudflare', 
+      'DigitalOcean'
+    ];
+
+    cloudSkills.forEach(skill => {
+      expect(screen.getByText(skill)).toBeInTheDocument();
+    });
   });
 
-  it('should have correct section id for navigation', () => {
-    renderSkills();
-    const section = document.getElementById('skills');
-    expect(section).toBeInTheDocument();
+  it('displays development skills', () => {
+    render(
+      <MockThemeProvider>
+        <Skills />
+      </MockThemeProvider>
+    );
+    
+    const devSkills = [
+      'Shell Script', 
+      'Python', 
+      'Node.js', 
+      'C++'
+    ];
+
+    devSkills.forEach(skill => {
+      expect(screen.getByText(skill)).toBeInTheDocument();
+    });
   });
 
-  it('should render the correct number of skill cards', () => {
-    renderSkills();
-    const skillCards = screen.getAllByText(/^(AWS|Docker|Kubernetes|Terraform|Jenkins|GitHub Actions)$/);
-    expect(skillCards).toHaveLength(6);
+  it('displays technical approach', () => {
+    render(
+      <MockThemeProvider>
+        <Skills />
+      </MockThemeProvider>
+    );
+    
+    const technicalApproach = [
+      'Práticas de Código Limpo', 
+      'Documentação Prioritária', 
+      'Aprendizado Contínuo'
+    ];
+
+    technicalApproach.forEach(approach => {
+      expect(screen.getByText(approach)).toBeInTheDocument();
+    });
   });
 });
