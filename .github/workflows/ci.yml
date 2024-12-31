@@ -45,7 +45,7 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
 
-  build-and-test:
+  build-and-upload:
     needs: set-version-and-environment
     runs-on: self-hosted
     steps:
@@ -84,19 +84,9 @@ jobs:
           zip -r ../build.zip .
           cd ..
 
-  upload-to-nexus:
-    needs: 
-      - set-version-and-environment
-      - build-and-test
-    runs-on: self-hosted
-    if: |
-      github.event_name == 'push' && (github.ref == 'refs/heads/development' || github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
       - name: Upload to Nexus
+        if: |
+          github.event_name == 'push' && (github.ref == 'refs/heads/development' || github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
         env:
           NEXUS_PASS: ${{ secrets.NEXUS_PASSWORD }}
           NEXUS_URL: ${{ secrets.NEXUS_URL }}
