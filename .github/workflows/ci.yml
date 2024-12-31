@@ -88,10 +88,14 @@ jobs:
         if: |
           github.event_name == 'push' && (github.ref == 'refs/heads/development' || github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
         env:
+          NEXUS_USER: ${{ secrets.NEXUS_USERNAME }}
           NEXUS_PASS: ${{ secrets.NEXUS_PASSWORD }}
           NEXUS_URL: ${{ secrets.NEXUS_URL }}
           NEXUS_REPO: ${{ secrets.NEXUS_REPOSITORY }}
+          REPOSITORY_NAME: ${{ secrets.REPOSITORY_NAME }}
+          NEXUS_ENV: ${{ needs.set-version-and-environment.outputs.environment }}
+          NEXUS_VERSION: ${{ needs.set-version-and-environment.outputs.version }}
         run: |
-          curl -u "${{ secrets.NEXUS_USERNAME }}:$NEXUS_PASS" \
+          curl -u "${NEXUS_USER}:$NEXUS_PASS" \
             --upload-file build.zip \
-            "${NEXUS_URL}/repository/${NEXUS_REPO}/${{ github.event.repository.name }}/${{ needs.set-version-and-environment.outputs.environment }}/${{ needs.set-version-and-environment.outputs.version }}.zip"
+            "${NEXUS_URL}/repository/${NEXUS_REPO}/${REPOSITORY_NAME}/${NEXUS_ENV}/${NEXUS_VERSION}.zip"
