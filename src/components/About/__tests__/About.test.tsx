@@ -1,6 +1,5 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { ThemeProvider } from '../../../contexts/ThemeContext';
 import About from '..';
 
 // Mock para window.matchMedia
@@ -18,12 +17,17 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
+// Mock ThemeProvider
+const MockThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <div data-testid="mock-theme-provider">{children}</div>
+);
+
 describe('About Component', () => {
   it('renders without crashing', () => {
     render(
-      <ThemeProvider>
+      <MockThemeProvider>
         <About />
-      </ThemeProvider>
+      </MockThemeProvider>
     );
     
     expect(screen.getByText(/DevOps & Especialista em Cloud/i)).toBeInTheDocument();
@@ -31,9 +35,9 @@ describe('About Component', () => {
 
   it('displays profile information', () => {
     render(
-      <ThemeProvider>
+      <MockThemeProvider>
         <About />
-      </ThemeProvider>
+      </MockThemeProvider>
     );
     
     expect(screen.getByText(/DevOps & Especialista em Cloud/i)).toBeInTheDocument();

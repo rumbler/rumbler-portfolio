@@ -1,5 +1,5 @@
-import React, { act } from 'react';
-import { render, screen } from '@testing-library/react';
+import React from 'react';
+import { act, render, screen } from '@testing-library/react';
 import App from './App';
 
 // Mock dos componentes
@@ -9,22 +9,23 @@ jest.mock('./components/Skills', () => () => <div data-testid="mock-skills">Skil
 jest.mock('./components/Contact', () => () => <div data-testid="mock-contact">Contact</div>);
 jest.mock('./components/LandingPage', () => () => <div data-testid="mock-landing">LandingPage</div>);
 
-// Mock do ThemeProvider
-jest.mock('./contexts/ThemeContext', () => ({
-  ThemeProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  useTheme: () => ({
-    isDarkMode: false,
-    toggleTheme: jest.fn(),
-  }),
-}));
+// Mock ThemeProvider
+const MockThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <div data-testid="mock-theme-provider">{children}</div>
+);
 
 describe('App Component', () => {
-  it('should render all main sections', () => {
+  it('renders without crashing', () => {
     act(() => {
-      render(<App />);
+      render(
+        <MockThemeProvider>
+          <App />
+        </MockThemeProvider>
+      );
     });
     
-    // Verificar se todos os componentes principais estão presentes
+    // Adicione aqui verificações básicas do App
+    expect(screen.getByTestId('mock-theme-provider')).toBeInTheDocument();
     expect(screen.getByTestId('mock-header')).toBeInTheDocument();
     expect(screen.getByTestId('mock-landing')).toBeInTheDocument();
     expect(screen.getByTestId('mock-about')).toBeInTheDocument();

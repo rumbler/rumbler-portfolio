@@ -1,6 +1,5 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { ThemeProvider } from '../../../contexts/ThemeContext';
 import Contact from '../index';
 
 // Mock environment variables
@@ -32,12 +31,17 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
+// Mock ThemeProvider
+const MockThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <div data-testid="mock-theme-provider">{children}</div>
+);
+
 describe('Contact Component', () => {
   it('renders without crashing', () => {
     render(
-      <ThemeProvider>
+      <MockThemeProvider>
         <Contact />
-      </ThemeProvider>
+      </MockThemeProvider>
     );
     
     expect(screen.getByText('Entre em Contato')).toBeInTheDocument();
@@ -45,9 +49,9 @@ describe('Contact Component', () => {
 
   it('displays contact information', () => {
     render(
-      <ThemeProvider>
+      <MockThemeProvider>
         <Contact />
-      </ThemeProvider>
+      </MockThemeProvider>
     );
     
     // Verifica textos
@@ -63,9 +67,9 @@ describe('Contact Component', () => {
 
   it('has correct links', () => {
     render(
-      <ThemeProvider>
+      <MockThemeProvider>
         <Contact />
-      </ThemeProvider>
+      </MockThemeProvider>
     );
     
     const links = screen.getAllByRole('link');

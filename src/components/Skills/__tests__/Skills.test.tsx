@@ -1,7 +1,11 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { ThemeProvider } from '../../../contexts/ThemeContext';
 import Skills from '..';
+
+// Mock ThemeProvider
+const MockThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <div data-testid="mock-theme-provider">{children}</div>
+);
 
 // Mock react-icons/fa
 jest.mock('react-icons/fa', () => ({
@@ -30,27 +34,57 @@ jest.mock('react-icons/si', () => ({
   SiCplusplus: () => <svg data-testid="icon-cplusplus" />
 }));
 
+// Mock localStorage
+const localStorageMock = (() => {
+  let store: { [key: string]: string } = {};
+  return {
+    getItem: jest.fn((key: string) => store[key] || null),
+    setItem: jest.fn((key: string, value: string) => {
+      store[key] = value.toString();
+    }),
+    clear: jest.fn(() => {
+      store = {};
+    }),
+    removeItem: jest.fn((key: string) => {
+      delete store[key];
+    }),
+  };
+})();
+
+Object.defineProperty(window, 'localStorage', {
+  value: localStorageMock
+});
+
 // Mock window.matchMedia
+const matchMediaMock = jest.fn().mockImplementation(query => ({
+  matches: false,
+  media: query,
+  onchange: null,
+  addListener: jest.fn(), 
+  removeListener: jest.fn(), 
+  addEventListener: jest.fn(),
+  removeEventListener: jest.fn(),
+  dispatchEvent: jest.fn(),
+}));
+
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
-  value: jest.fn().mockImplementation(query => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: jest.fn(), 
-    removeListener: jest.fn(), 
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
-  })),
+  value: matchMediaMock
 });
 
 describe('Skills Component', () => {
+  beforeEach(() => {
+    // Limpar mocks antes de cada teste
+    localStorageMock.getItem.mockClear();
+    localStorageMock.setItem.mockClear();
+    matchMediaMock.mockClear();
+  });
+
   it('renders without crashing', () => {
     render(
-      <ThemeProvider>
+      <MockThemeProvider>
         <Skills />
-      </ThemeProvider>
+      </MockThemeProvider>
     );
     
     expect(screen.getByText('Minhas Habilidades')).toBeInTheDocument();
@@ -58,9 +92,9 @@ describe('Skills Component', () => {
 
   it('displays all skill sections', () => {
     render(
-      <ThemeProvider>
+      <MockThemeProvider>
         <Skills />
-      </ThemeProvider>
+      </MockThemeProvider>
     );
     
     // Verifica seções de habilidades
@@ -80,9 +114,9 @@ describe('Skills Component', () => {
 
   it('displays cloud skills', () => {
     render(
-      <ThemeProvider>
+      <MockThemeProvider>
         <Skills />
-      </ThemeProvider>
+      </MockThemeProvider>
     );
     
     const cloudSkills = [
@@ -99,9 +133,9 @@ describe('Skills Component', () => {
 
   it('displays development skills', () => {
     render(
-      <ThemeProvider>
+      <MockThemeProvider>
         <Skills />
-      </ThemeProvider>
+      </MockThemeProvider>
     );
     
     const devSkills = [
@@ -118,18 +152,18 @@ describe('Skills Component', () => {
 
   it('displays technical approach', () => {
     render(
-      <ThemeProvider>
+      <MockThemeProvider>
         <Skills />
-      </ThemeProvider>
+      </MockThemeProvider>
     );
     
-    const approaches = [
+    const technicalApproach = [
       'Práticas de Código Limpo', 
       'Documentação Prioritária', 
       'Aprendizado Contínuo'
     ];
 
-    approaches.forEach(approach => {
+    technicalApproach.forEach(approach => {
       expect(screen.getByText(approach)).toBeInTheDocument();
     });
   });
