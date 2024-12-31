@@ -53,7 +53,7 @@ jobs:
           ENVIRONMENT=${{ steps.version.outputs.environment }}
           curl -u "${{ secrets.NEXUS_USERNAME }}:$NEXUS_PASS" \
             -o build.zip \
-            "${NEXUS_URL}/repository/${NEXUS_REPO}/${{ github.event.repository.name }}/${ENVIRONMENT}/${VERSION}.zip"
+            "${NEXUS_URL}/repository/raw-hosted/rumbler-portfolio/${ENVIRONMENT}/${VERSION}.zip"
           unzip build.zip -d build/
 
       - name: Build and push Docker image
