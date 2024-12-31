@@ -33,7 +33,7 @@ jobs:
           fetch-depth: 0
       
       - name: Get version and environment
-        id: version
+        id: get_version
         run: |
           if [[ $GITHUB_REF == 'refs/heads/development' ]]; then
             VERSION=$(git rev-parse --short HEAD)
@@ -49,11 +49,10 @@ jobs:
           NEXUS_REPO: ${{ secrets.NEXUS_REPOSITORY }}
         run: |
           mkdir -p build
-          VERSION=${{ steps.version.outputs.version }}
-          ENVIRONMENT=${{ steps.version.outputs.environment }}
+          VERSION=${{ github.event.inputs.version || steps.get_version.outputs.version }}
           curl -u "${{ secrets.NEXUS_USERNAME }}:$NEXUS_PASS" \
             -o build.zip \
-            "${NEXUS_URL}/repository/raw-hosted/rumbler-portfolio/${ENVIRONMENT}/${VERSION}.zip"
+            "${NEXUS_URL}/repository/${NEXUS_REPO}/${{ github.event.repository.name }}/development/${VERSION}.zip"
           unzip build.zip -d build/
 
       - name: Build and push Docker image
