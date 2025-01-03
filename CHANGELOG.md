@@ -16,6 +16,13 @@
 - ✨ Update About styles and PWA assets (#62)
 
 
+## [1.2.2] - 2024-12-10
+
+### Other Changes
+- Fix: Docker build and PWA manifest improvements (#63)
+- ✨ Update About styles and PWA assets (#62)
+
+
 ## [1.2.1] - 2024-12-09
 
 ### Fixed
