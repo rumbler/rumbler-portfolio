@@ -27,6 +27,7 @@ jobs:
     env:
       NODE_ENV: production
       PORT: 3000
+      PRODUCTION_DOMAIN: ${{ secrets.PRODUCTION_DOMAIN }}
       DOCKER_CPU_LIMIT: 1
       DOCKER_MEMORY_LIMIT: 512M
       DOCKER_CPU_RESERVE: 0.75
@@ -37,24 +38,36 @@ jobs:
         with:
           fetch-depth: 0
       
-      - name: Get version from tag
+      - name: Set version and environment
         if: github.event.inputs.version == ''
-        id: get_version
+        id: version
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}  # Remove o prefixo 'refs/tags/v'
+          ENVIRONMENT="production"
+
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "environment=${ENVIRONMENT}" >> $GITHUB_OUTPUT
 
       - name: Download build from Nexus
         env:
           NEXUS_PASS: ${{ secrets.NEXUS_PASSWORD }}
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           NEXUS_URL: ${{ secrets.NEXUS_URL }}
           NEXUS_REPO: ${{ secrets.NEXUS_REPOSITORY }}
+          REPOSITORY_NAME: ${{ secrets.REPOSITORY_NAME }}
+          NEXUS_ENV: ${{ steps.version.outputs.environment }}
+          NEXUS_VERSION: ${{ steps.version.outputs.version }}
         run: |
           mkdir -p build
-          TAG=${GITHUB_REF#refs/tags/}
-          curl -u "${{ secrets.NEXUS_USERNAME }}:$NEXUS_PASS" \
+          curl -u "$NEXUS_USERNAME:$NEXUS_PASS" \
             -o build.zip \
-            "${NEXUS_URL}/repository/${NEXUS_REPO}/${{ github.event.repository.name }}/production/${TAG}.zip"
+            "${NEXUS_URL}/repository/${NEXUS_REPO}/${REPOSITORY_NAME}/${NEXUS_ENV}/${NEXUS_VERSION}.zip"
+            
+            if [ ! -f build.zip ]; then
+              echo "Error: Build file not downloaded"
+              exit 1
+            fi
+
           unzip build.zip -d build/
 
       - name: Build and push Docker image
@@ -62,22 +75,24 @@ jobs:
           REGISTRY_URL: ${{ secrets.REGISTRY_URL }}
           NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           NEXUS_PASS: ${{ secrets.NEXUS_PASSWORD }}
+          REPOSITORY_NAME: ${{ secrets.REPOSITORY_NAME }}
+          NEXUS_ENV: ${{ steps.version.outputs.environment }}
+          NEXUS_VERSION: ${{ steps.version.outputs.version }}
         run: |
           # Login no Docker Registry
           echo "$NEXUS_PASS" | docker login $REGISTRY_URL -u "$NEXUS_USERNAME" --password-stdin
           
-          VERSION=${{ github.event.inputs.version || steps.get_version.outputs.version }}
-          docker build -t ${REGISTRY_URL}/rumbler-portfolio:${VERSION} .
-          docker push ${REGISTRY_URL}/rumbler-portfolio:${VERSION}
+          docker build -t ${REGISTRY_URL}/${REPOSITORY_NAME}:${NEXUS_VERSION} .
+          docker push ${REGISTRY_URL}/${REPOSITORY_NAME}:${NEXUS_VERSION}
           
           # Tag as latest
-          docker tag ${REGISTRY_URL}/rumbler-portfolio:${VERSION} ${REGISTRY_URL}/rumbler-portfolio:latest
-          docker push ${REGISTRY_URL}/rumbler-portfolio:latest
+          docker tag ${REGISTRY_URL}/${REPOSITORY_NAME}:${NEXUS_VERSION} ${REGISTRY_URL}/${REPOSITORY_NAME}:latest
+          docker push ${REGISTRY_URL}/${REPOSITORY_NAME}:latest
 
       - name: Deploy to Production
         env:
-          PROD_IMAGE_TAG: ${{ github.event.inputs.version || steps.get_version.outputs.version }}
           REGISTRY_URL: ${{ secrets.REGISTRY_URL }}
+          PROD_IMAGE_TAG: ${{ steps.version.outputs.version }}
           NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           NEXUS_PASS: ${{ secrets.NEXUS_PASSWORD }}
           PROD_PORT: 3000
@@ -85,12 +100,16 @@ jobs:
           PROD_MEMORY_LIMIT: 512M
           PROD_CPU_RESERVE: 0.75
           PROD_MEMORY_RESERVE: 384M
+          PRODUCTION_DOMAIN: ${{ secrets.PRODUCTION_DOMAIN }}
         run: |
-          # Login no Docker Registry
+          echo "Logging into Docker Registry..."
           echo "$NEXUS_PASS" | docker login $REGISTRY_URL -u "$NEXUS_USERNAME" --password-stdin
           
-          # Pull new image first
+          echo "Pulling the latest production image..."
           docker compose pull portfolio-production
           
-          # Rolling update - zero downtime
-          docker compose up -d --no-deps --build --force-recreate --remove-orphans portfolio-production
+          echo "Deploying the updated production container..."
+          docker compose up -d \
+            --no-deps \
+            --remove-orphans \
+            portfolio-production

@@ -1,33 +1,36 @@
-# Serve stage
 FROM node:20-alpine
 
-# Install pnpm
+# Instalar pnpm
 RUN wget -qO /bin/pnpm "https://github.com/pnpm/pnpm/releases/latest/download/pnpm-linuxstatic-x64" && chmod +x /bin/pnpm
 
-# Create non-root user
+# Criar usuário não-root
 RUN addgroup -S -g 1001 appgroup && adduser -S -u 1001 -G appgroup appuser
 
-# Set working directory
+# Configurar diretórios e permissões
 WORKDIR /app
-
-# Set up pnpm environment
 ENV PNPM_HOME="/usr/local/share/pnpm"
 ENV PATH="${PNPM_HOME}:${PATH}"
-RUN mkdir -p ${PNPM_HOME}
+RUN mkdir -p ${PNPM_HOME} && \
+    chown -R appuser:appgroup ${PNPM_HOME} /usr/local/bin
 
-# Install serve globally and set permissions
-RUN pnpm add -g serve && \
-    chown -R appuser:appgroup ${PNPM_HOME} && \
-    chown -R appuser:appgroup /usr/local/bin
+# Copiar arquivos de dependências
+COPY package.json pnpm-lock.yaml ./
 
-# Copy pre-built assets from Nexus artifact
+# Instalar dependências de produção
+RUN pnpm install --prod --frozen-lockfile
+
+# Copiar os arquivos necessários
 COPY --chown=appuser:appgroup build ./build
+COPY --chown=appuser:appgroup src/server.js ./
 
-# Switch to non-root user
+# Alternar para usuário não-root
 USER appuser
 
-# Expose port
-EXPOSE 3000
+# Variáveis de ambiente padrão
+ENV NODE_ENV=production \
+    PORT=3000 \
+    PRODUCTION_DOMAIN=""
 
-# Start server
-CMD ["serve", "-s", "build"]
+# Expor porta e iniciar servidor
+EXPOSE 3000
+CMD ["node", "server.js"]

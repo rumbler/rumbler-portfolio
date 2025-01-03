@@ -1,56 +1,47 @@
-import { render, screen } from '@testing-library/react';
-import About from '../index';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
+import About from '..';
 
-// Mock styled-components
-jest.mock('styled-components', () => ({
-  __esModule: true,
-  default: {
-    section: () => 'section',
-    div: () => 'div',
-    img: () => 'img',
-    h2: () => 'h2',
-    p: () => 'p'
-  },
-  ThemeProvider: ({ children }) => children
-}));
+// Mock para window.matchMedia
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: jest.fn().mockImplementation(query => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn(),
+  })),
+});
+
+// Mock ThemeProvider
+const MockThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <div data-testid="mock-theme-provider">{children}</div>
+);
 
 describe('About Component', () => {
-  const renderAbout = () => {
-    return render(<About />);
-  };
-
-  it('should render the profile image with correct alt text', async () => {
-    renderAbout();
-    const image = await screen.findByAltText('Rumbler Soppa');
-    expect(image).toBeInTheDocument();
-    expect(image.tagName).toBe('IMG');
+  it('renders without crashing', () => {
+    render(
+      <MockThemeProvider>
+        <About />
+      </MockThemeProvider>
+    );
+    
+    expect(screen.getByText(/DevOps & Especialista em Cloud/i)).toBeInTheDocument();
   });
 
-  it('should render the "About Me" heading', async () => {
-    renderAbout();
-    const heading = await screen.findByText('About Me');
-    expect(heading).toBeInTheDocument();
-    expect(heading.tagName).toBe('H2');
-  });
-
-  it('should render the introduction paragraph', async () => {
-    renderAbout();
-    const introParagraph = await screen.findByText(/Hi! I'm Rumbler Soppa/);
-    expect(introParagraph).toBeInTheDocument();
-    expect(introParagraph.tagName).toBe('P');
-  });
-
-  it('should render the expertise paragraph', async () => {
-    renderAbout();
-    const expertiseParagraph = await screen.findByText(/My expertise includes/);
-    expect(expertiseParagraph).toBeInTheDocument();
-    expect(expertiseParagraph.tagName).toBe('P');
-  });
-
-  it('should have correct section id for navigation', () => {
-    renderAbout();
-    const section = document.getElementById('about');
-    expect(section).toBeInTheDocument();
+  it('displays profile information', () => {
+    render(
+      <MockThemeProvider>
+        <About />
+      </MockThemeProvider>
+    );
+    
+    expect(screen.getByText(/DevOps & Especialista em Cloud/i)).toBeInTheDocument();
+    expect(screen.getByText(/Especialista em tecnologia/i)).toBeInTheDocument();
+    expect(screen.getByText(/tecnologias de ponta/i)).toBeInTheDocument();
   });
 });

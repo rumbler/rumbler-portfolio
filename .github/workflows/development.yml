@@ -1,4 +1,4 @@
-name: Development CD
+name: Continuous Deployment to Development Environment
 
 on:
   push:
@@ -14,64 +14,82 @@ permissions:
 
 jobs:
   deploy-development:
-    name: Deploy to Development
-    if: github.ref == 'refs/heads/development'
     runs-on: self-hosted
     environment: development
     env:
       NODE_ENV: development
       PORT: 3001
+      PRODUCTION_DOMAIN: ${{ secrets.DEV_DOMAIN }}
       DOCKER_CPU_LIMIT: 0.5
       DOCKER_MEMORY_LIMIT: 256M
       DOCKER_CPU_RESERVE: 0.25
       DOCKER_MEMORY_RESERVE: 128M
     
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       
-      - name: Get version from commit
-        id: get_version
+      - name: Set version and environment
+        id: version
         run: |
-          COMMIT_SHA=${{ github.sha }}
-          VERSION="${COMMIT_SHA:0:7}"
+          case "${{ github.ref }}" in
+            refs/heads/development) VERSION="$(git rev-parse --short HEAD)"; ENVIRONMENT="development" ;;
+            refs/heads/main)       VERSION="rc-$(git rev-parse --short HEAD)"; ENVIRONMENT="release" ;;
+            refs/tags/v[0-9]*.[0-9]*.[0-9]*) VERSION="${{ github.ref_name }}"; ENVIRONMENT="production" ;;
+            *)                     VERSION="dev-$(git rev-parse --short HEAD)"; ENVIRONMENT="development" ;;
+          esac
+
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
-      
+          echo "environment=${ENVIRONMENT}" >> $GITHUB_OUTPUT
+
       - name: Download build from Nexus
         env:
           NEXUS_PASS: ${{ secrets.NEXUS_PASSWORD }}
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           NEXUS_URL: ${{ secrets.NEXUS_URL }}
           NEXUS_REPO: ${{ secrets.NEXUS_REPOSITORY }}
+          REPOSITORY_NAME: ${{ secrets.REPOSITORY_NAME }}
+          NEXUS_ENV: ${{ steps.version.outputs.environment }}
+          NEXUS_VERSION: ${{ steps.version.outputs.version }}
         run: |
           mkdir -p build
-          VERSION=${{ github.event.inputs.version || steps.get_version.outputs.version }}
-          curl -u "${{ secrets.NEXUS_USERNAME }}:$NEXUS_PASS" \
+          curl -u "$NEXUS_USERNAME:$NEXUS_PASS" \
             -o build.zip \
-            "${NEXUS_URL}/repository/${NEXUS_REPO}/${{ github.event.repository.name }}/development/${VERSION}.zip"
+            "${NEXUS_URL}/repository/${NEXUS_REPO}/${REPOSITORY_NAME}/${NEXUS_ENV}/${NEXUS_VERSION}.zip"
+            
+            if [ ! -f build.zip ]; then
+              echo "Error: Build file not downloaded"
+              exit 1
+            fi
+
           unzip build.zip -d build/
+
 
       - name: Build and push Docker image
         env:
           REGISTRY_URL: ${{ secrets.REGISTRY_URL }}
           NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           NEXUS_PASS: ${{ secrets.NEXUS_PASSWORD }}
+          REPOSITORY_NAME: ${{ secrets.REPOSITORY_NAME }}
+          NEXUS_ENV: ${{ steps.version.outputs.environment }}
+          NEXUS_VERSION: ${{ steps.version.outputs.version }}
         run: |
           # Login no Docker Registry
           echo "$NEXUS_PASS" | docker login $REGISTRY_URL -u "$NEXUS_USERNAME" --password-stdin
           
-          VERSION=${{ github.event.inputs.version || steps.get_version.outputs.version }}
-          docker build -t ${REGISTRY_URL}/${{ github.event.repository.name }}:${VERSION} .
-          docker push ${REGISTRY_URL}/${{ github.event.repository.name }}:${VERSION}
+          docker build -t ${REGISTRY_URL}/${REPOSITORY_NAME}:${NEXUS_VERSION} .
+          docker push ${REGISTRY_URL}/${REPOSITORY_NAME}:${NEXUS_VERSION}
           
           # Tag as development
-          docker tag ${REGISTRY_URL}/${{ github.event.repository.name }}:${VERSION} ${REGISTRY_URL}/${{ github.event.repository.name }}:development
-          docker push ${REGISTRY_URL}/${{ github.event.repository.name }}:development
+          docker tag ${REGISTRY_URL}/${REPOSITORY_NAME}:${NEXUS_VERSION} ${REGISTRY_URL}/${REPOSITORY_NAME}:development
+          docker push ${REGISTRY_URL}/${REPOSITORY_NAME}:development
 
       - name: Deploy to Development
         env:
-          DEV_IMAGE_TAG: ${{ github.event.inputs.version || steps.get_version.outputs.version }}
           REGISTRY_URL: ${{ secrets.REGISTRY_URL }}
+          DEV_IMAGE_TAG: ${{ steps.version.outputs.version }}
           NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
           NEXUS_PASS: ${{ secrets.NEXUS_PASSWORD }}
           DEV_PORT: 3001
@@ -79,12 +97,17 @@ jobs:
           DEV_MEMORY_LIMIT: 256M
           DEV_CPU_RESERVE: 0.25
           DEV_MEMORY_RESERVE: 128M
-        run: |
-          # Login no Docker Registry
+        run: |      
+          echo "Logging into Docker Registry..."
           echo "$NEXUS_PASS" | docker login $REGISTRY_URL -u "$NEXUS_USERNAME" --password-stdin
-          
-          # Pull new image first
+      
+          echo "Pulling the latest development image..."
           docker compose pull portfolio-development
-          
-          # Rolling update - zero downtime
-          docker compose up -d --no-deps --build --force-recreate --remove-orphans portfolio-development
+      
+          echo "Deploying the updated development container..."
+          docker compose up -d \
+            --no-deps \
+            --remove-orphans \
+            portfolio-development
+      
+          echo "Deployment to the development environment completed successfully."
