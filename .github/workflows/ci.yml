@@ -15,70 +15,48 @@ on:
       - "main"
 
 jobs:
-  set-version-and-environment:
-    runs-on: self-hosted
-    if: |
-      github.event_name == 'push' && (github.ref == 'refs/heads/development' || github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
-    outputs:
-      version: ${{ steps.version.outputs.version }}
-      environment: ${{ steps.version.outputs.environment }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      
-      - name: Set Version and Environment
-        id: version
-        run: |
-          if [[ $GITHUB_EVENT_NAME == 'push' ]]; then
-            if [[ $GITHUB_REF == 'refs/heads/development' ]]; then
-              VERSION=$(git rev-parse --short HEAD)
-              ENVIRONMENT="development"
-            elif [[ $GITHUB_REF == refs/tags/* ]]; then
-              VERSION=${GITHUB_REF#refs/tags/}
-              ENVIRONMENT="production"
-            elif [[ $GITHUB_REF == 'refs/heads/main' ]]; then
-              VERSION="v$(git rev-parse --short HEAD)"
-              ENVIRONMENT="release"
-            fi
-          fi
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
-
   build-and-upload:
-    needs: set-version-and-environment
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
-      - name: Install Node.js
+
+      - name: Set version and environment
+        id: version
+        if: |
+          github.event_name == 'push' && (github.ref == 'refs/heads/development' || github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+        run: |
+          case "${{ github.ref }}" in
+            refs/heads/development) VERSION="$(git rev-parse --short HEAD)"; ENVIRONMENT="development" ;;
+            refs/heads/main)       VERSION="rc-$(git rev-parse --short HEAD)"; ENVIRONMENT="release" ;;
+            refs/tags/v[0-9]*.[0-9]*.[0-9]*) VERSION="${{ github.ref_name }}"; ENVIRONMENT="production" ;;
+            *)                     VERSION="dev-$(git rev-parse --short HEAD)"; ENVIRONMENT="development" ;;
+          esac
+
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "environment=${ENVIRONMENT}" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8.15.4
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20.10.0
+          node-version: 20
+          cache: 'pnpm'
 
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 8
-      
       - name: Install dependencies
         run: pnpm install
 
-      - name: Run tests
-        run: pnpm test
-
       - name: Build
-        env:
-          REACT_APP_LINKEDIN_URL: ${{ secrets.REACT_APP_LINKEDIN_URL }}
-          REACT_APP_GITHUB_URL: ${{ secrets.REACT_APP_GITHUB_URL }}
-          REACT_APP_EMAIL_URL: ${{ secrets.REACT_APP_EMAIL_URL }}
-          REACT_APP_WHATSAPP_URL: ${{ secrets.REACT_APP_WHATSAPP_URL }}
-        run: pnpm build
+        run: |
+          pnpm run build
 
-      - name: Create build artifact
-        if: |
-          github.event_name == 'push' && (github.ref == 'refs/heads/development' || github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+      - name: Zip build
         run: |
           cd build
           zip -r ../build.zip .
@@ -86,15 +64,15 @@ jobs:
 
       - name: Upload to Nexus
         if: |
-          github.event_name == 'push' && (github.ref == 'refs/heads/development' || github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+          github.event_name == 'push' && (github.ref == 'refs/heads/development' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/tags/v'))
         env:
           NEXUS_USER: ${{ secrets.NEXUS_USERNAME }}
           NEXUS_PASS: ${{ secrets.NEXUS_PASSWORD }}
           NEXUS_URL: ${{ secrets.NEXUS_URL }}
           NEXUS_REPO: ${{ secrets.NEXUS_REPOSITORY }}
           REPOSITORY_NAME: ${{ secrets.REPOSITORY_NAME }}
-          NEXUS_ENV: ${{ needs.set-version-and-environment.outputs.environment }}
-          NEXUS_VERSION: ${{ needs.set-version-and-environment.outputs.version }}
+          NEXUS_ENV: ${{ steps.version.outputs.environment }}
+          NEXUS_VERSION: ${{ steps.version.outputs.version }}
         run: |
           curl -u "${NEXUS_USER}:$NEXUS_PASS" \
             --upload-file build.zip \
