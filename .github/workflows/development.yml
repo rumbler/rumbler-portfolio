@@ -91,6 +91,8 @@ jobs:
         env:
           REGISTRY_URL: ${{ secrets.REGISTRY_URL }}
           DEV_IMAGE_TAG: ${{ steps.version.outputs.version }}
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASS: ${{ secrets.NEXUS_PASSWORD }}
           DEV_PORT: 3001
           DEV_CPU_LIMIT: 0.5
           DEV_MEMORY_LIMIT: 256M

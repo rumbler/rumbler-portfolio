@@ -64,7 +64,7 @@ jobs:
 
       - name: Upload to Nexus
         if: |
-          github.event_name == 'push' && (github.ref == 'refs/heads/development' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/tags/v'))
+          github.event_name == 'push' && (github.ref == 'refs/heads/development' || github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
         env:
           NEXUS_USER: ${{ secrets.NEXUS_USERNAME }}
           NEXUS_PASS: ${{ secrets.NEXUS_PASSWORD }}
