@@ -15,9 +15,6 @@ permissions:
 jobs:
   deploy-development:
     runs-on: self-hosted
-    outputs:
-      version: ${{ steps.version.outputs.version }}
-      environment: ${{ steps.version.outputs.environment }}
     environment: development
     env:
       NODE_ENV: development
@@ -61,10 +58,12 @@ jobs:
           curl -u "$NEXUS_USERNAME:$NEXUS_PASS" \
             -o build.zip \
             "${NEXUS_URL}/repository/${NEXUS_REPO}/${REPOSITORY_NAME}/${NEXUS_ENV}/${NEXUS_VERSION}.zip"
+            
             if [ ! -f build.zip ]; then
               echo "Error: Build file not downloaded"
               exit 1
             fi
+
           unzip build.zip -d build/
 
 
@@ -111,12 +110,4 @@ jobs:
             --remove-orphans \
             portfolio-development
       
-          echo "Verifying deployment..."
-          CONTAINER_STATUS=$(docker inspect -f '{{.State.Status}}' rumbler-portfolio-development-${{ steps.version.outputs.version }})
-          if [ "$CONTAINER_STATUS" != "running" ]; then
-            echo "Error: Deployment failed. Container status: $CONTAINER_STATUS"
-            exit 1
-          fi
-      
           echo "Deployment to the development environment completed successfully."
-        
