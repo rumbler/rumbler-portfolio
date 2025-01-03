@@ -78,7 +78,7 @@ jobs:
           # Login no Docker Registry
           echo "$NEXUS_PASS" | docker login $REGISTRY_URL -u "$NEXUS_USERNAME" --password-stdin
           
-          docker build -t ${REGISTRY_URL}/rumbler-portfolio:${NEXUS_VERSION} .
+          docker build -t ${REGISTRY_URL}/${REPOSITORY_NAME}:${NEXUS_VERSION} .
           docker push ${REGISTRY_URL}/rumbler-portfolio:${NEXUS_VERSION}
           
           # Tag as release
@@ -101,13 +101,13 @@ jobs:
           echo "Logging into Docker Registry..."
           echo "$NEXUS_PASS" | docker login $REGISTRY_URL -u "$NEXUS_USERNAME" --password-stdin
           
-          echo "Pulling the latest development image..."
+          echo "Pulling the latest release image..."
           docker compose pull portfolio-release
           
-          echo "Deploying the updated development container..."
+          echo "Deploying the updated release container..."
           docker compose up -d \
             --no-deps \
             --remove-orphans \
             portfolio-release
 
-          echo "Deployment to the development environment completed successfully."
+          echo "Deployment to the release environment completed successfully."
