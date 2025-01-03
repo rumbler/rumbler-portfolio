@@ -16,6 +16,47 @@
 - ✨ Update About styles and PWA assets (#62)
 
 
+## [1.3.0] - 2025-01-03
+
+### Fixed
+- fix: revert commit
+- fix: corrige caminho de download do artefato no Nexus
+
+### Other Changes
+- Resolver conflitos de merge: atualizar componentes e arquivos de configuração
+- Padronizar workflows de release e produção: corrigir nomes de imagens, melhorar tratamento de variáveis e logs
+- Refatorar workflows de desenvolvimento e release: padronizar nomenclatura, melhorar tratamento de erros e variáveis de ambiente
+- Ajustar ordem das variáveis de ambiente nos workflows de CI e desenvolvimento
+- Refatorar fluxos de CI/CD: atualizar lógica de versão e ambiente, melhorar etapas de upload no Nexus e implantação
+- refactor: adicionar variaveis de ambiente para upload de artefato no Nexus
+- refactor: substituir github.event.repository.name por secret REPOSITORY_NAME
+- refactor: renomear job para build-and-upload no workflow de CI
+- refactor: padronizar workflow de CI/CD para development e main
+- refactor: ajusta workflow de CD para consistência no download de artefatos
+- refactor: remove styled-components e migra para Tailwind CSS (#65)
+- Release: PWA Improvements and Docker Optimization (#64)
+- chore: bump version 1.2.2
+- Fix: Docker build and PWA manifest improvements (#63)
+- ✨ Update About styles and PWA assets (#62)
+
+## [Unreleased]
+
+### Removed
+- Componente Pipelines removido completamente do projeto
+- Referências a Pipelines removidas de testes e componentes relacionados
+
+### Changed
+- Atualização da seção de Habilidades com novas tecnologias e categorias
+- Simplificação da estrutura de navegação e componentes
+
+
+## [1.2.2] - 2024-12-10
+
+### Other Changes
+- Fix: Docker build and PWA manifest improvements (#63)
+- ✨ Update About styles and PWA assets (#62)
+
+
 ## [1.2.2] - 2024-12-10
 
 ### Other Changes
