@@ -1,3 +1,20 @@
+## [Unreleased]
+
+### Removed
+- Componente Pipelines removido completamente do projeto
+- Referências a Pipelines removidas de testes e componentes relacionados
+
+### Changed
+- Atualização da seção de Habilidades com novas tecnologias e categorias
+- Simplificação da estrutura de navegação e componentes
+
+
+## [1.2.2] - 2024-12-10
+
+### Other Changes
+- Fix: Docker build and PWA manifest improvements (#63)
+- ✨ Update About styles and PWA assets (#62)
+
 
 ## [1.3.0] - 2025-01-03
 
