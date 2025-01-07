@@ -42,7 +42,7 @@ jobs:
         if: github.event.inputs.version == ''
         id: version
         run: |
-          VERSION=${GITHUB_REF#refs/tags/v}  # Remove o prefixo 'refs/tags/v'
+          VERSION="${{ github.ref_name }}
           ENVIRONMENT="production"
 
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
