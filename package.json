@@ -15,6 +15,9 @@
     "version:patch": "bash scripts/version-bump.sh patch",
     "version:minor": "bash scripts/version-bump.sh minor",
     "version:major": "bash scripts/version-bump.sh major",
+    "version:patch:dry-run": "bash scripts/version-bump.sh patch --dry-run",
+    "version:minor:dry-run": "bash scripts/version-bump.sh minor --dry-run",
+    "version:major:dry-run": "bash scripts/version-bump.sh major --dry-run",
     "start:prod": "node server.js"
   },
   "dependencies": {
