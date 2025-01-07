@@ -1,15 +1,14 @@
-# Portfolio Project 🚀
+# Portfolio Project 
 
 [![CI](https://github.com/rumbler/rumbler-portfolio/actions/workflows/ci.yml/badge.svg)](https://github.com/rumbler/rumbler-portfolio/actions/workflows/ci.yml)
-[![Development](https://github.com/rumbler/rumbler-portfolio/actions/workflows/development.yml/badge.svg)](https://github.com/rumbler/rumbler-portfolio/actions/workflows/development.yml)
-[![Release](https://github.com/rumbler/rumbler-portfolio/actions/workflows/release.yml/badge.svg)](https://github.com/rumbler/rumbler-portfolio/actions/workflows/release.yml)
 [![Production](https://github.com/rumbler/rumbler-portfolio/actions/workflows/production.yml/badge.svg)](https://github.com/rumbler/rumbler-portfolio/actions/workflows/production.yml)
 
 > A modern and responsive portfolio built with React and TypeScript.
 
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Styled Components](https://img.shields.io/badge/styled--components-DB7093?style=for-the-badge&logo=styled-components&logoColor=white)](https://styled-components.com/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Docker](https://img.shields.io/badge/Docker-2CA5E0?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![Jest](https://img.shields.io/badge/Jest-C21325?style=for-the-badge&logo=jest&logoColor=white)](https://jestjs.io/)
 [![GitHub Actions](https://img.shields.io/badge/github%20actions-%232671E5.svg?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/features/actions)
 [![Nexus](https://img.shields.io/badge/Nexus%20Repository-143752?style=for-the-badge&logo=sonatype&logoColor=white)](https://www.sonatype.com/products/nexus-repository)
@@ -53,30 +52,34 @@
 ## Available Scripts
 
 - `pnpm start`        - Starts development server
+- `pnpm build`        - Creates production build
 - `pnpm test`         - Runs tests
-- `pnpm run build`    - Creates production build
-- `pnpm run lint`     - Checks for linting issues
-- `pnpm run format`   - Formats code with Prettier
+- `pnpm version:patch`- Bump patch version
+- `pnpm version:minor`- Bump minor version
+- `pnpm version:major`- Bump major version
+- `pnpm start:prod`   - Starts production server
 
 ## Project Structure
 
 ```bash
-portfolio/
-├── public/            # Static files
-└── src/
-    ├── components/    # React components
-    │   └── __tests__  # Component tests
-    ├── styles/        # Themes and global styles
-    │   ├── themes.ts       # Theme configurations
-    │   └── globalStyles.ts # Global style definitions
-    ├── types/         # TypeScript definitions
-    └── utils/         # Utility functions
+rumbler-portfolio/
+├── .github/          # GitHub Actions workflows
+├── docs/             # Project documentation
+├── public/           # Static files
+├── scripts/          # Utility scripts
+├── src/              # Source code
+│   ├── components/   # React components
+│   ├── styles/       # Themes and global styles
+│   ├── types/        # TypeScript definitions
+│   └── utils/        # Utility functions
+├── Dockerfile        # Docker configuration
+├── docker-compose.yml# Docker Compose configuration
+├── package.json      # Project dependencies and scripts
+└── tsconfig.json     # TypeScript configuration
 ```
 
 ## Environments
 
-- **Development**: [dev.example.com](https://dev.example.com)
-- **Release**: [release.example.com](https://release.example.com)
 - **Production**: [example.com](https://example.com)
 
 ## License
@@ -85,4 +88,4 @@ This project is under the MIT License. See the [LICENSE](LICENSE) file for detai
 
 ---
 
-⭐️ Made with ❤️ by [Rumbler Soppa](https://github.com/rumbler)
+ Made with  by [Rumbler Soppa](https://github.com/rumbler)
