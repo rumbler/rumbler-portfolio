@@ -12,13 +12,31 @@ const LandingPage: React.FC = () => {
   useEffect(() => {
     let currentText = '';
     let index = 0;
+    let isDeleting = false;
+
     const typingInterval = setInterval(() => {
-      if (index < fullText.length) {
-        currentText += fullText[index];
-        setDisplayText(currentText);
-        index++;
+      if (!isDeleting) {
+        // Modo de digitação
+        if (index < fullText.length) {
+          currentText += fullText[index];
+          setDisplayText(currentText);
+          index++;
+        } else {
+          // Começa a deletar após 2 segundos
+          setTimeout(() => {
+            isDeleting = true;
+          }, 2000);
+        }
       } else {
-        clearInterval(typingInterval);
+        // Modo de apagar
+        if (currentText.length > 0) {
+          currentText = currentText.slice(0, -1);
+          setDisplayText(currentText);
+        } else {
+          // Reinicia o ciclo
+          isDeleting = false;
+          index = 0;
+        }
       }
     }, 100);
 
