@@ -1,4 +1,15 @@
 
+## [1.4.5] - 2025-01-07
+
+### Added
+- feat(scripts): adicionar comandos de dry-run para bump de versão
+
+
+### Refactoring
+- refactor(changelog): melhorar geração de changelog com suporte a múltiplos tipos de commits
+- refactor(changelog): melhorar geração de changelog com suporte a múltiplos tipos de commits
+
+
 ## [1.4.4] - 2025-01-07
 
 ### Fixed
