@@ -99,47 +99,69 @@ get_commits_by_type() {
 # Generate changelog entry
 generate_changelog() {
     local version=$1
-    local features=$(get_commits_by_type "feat" "feat:")
-    local fixes=$(get_commits_by_type "fix" "fix:")
-    local docs=$(get_commits_by_type "docs" "docs:")
-    local others=$(git log --pretty=format:"%s" $(git describe --tags --abbrev=0 2>/dev/null || git rev-list --max-parents=0 HEAD)..HEAD | grep -vE "^(feat:|fix:|docs:)" || true)
+    local last_version_commit=$2  # Novo parâmetro para especificar o commit de referência
 
-    # Only include sections that have commits
+    # Se nenhum commit de referência for fornecido, use o último tag
+    if [ -z "$last_version_commit" ]; then
+        last_version_commit=$(git describe --tags --abbrev=0 2>/dev/null || git rev-list --max-parents=0 HEAD)
+    fi
+
+    # Array de tipos de commits para capturar
+    local commit_types=(
+        "feat:Added"
+        "fix:Fixed"
+        "docs:Documentation"
+        "style:Style Changes"
+        "refactor:Refactoring"
+        "perf:Performance Improvements"
+        "test:Test Changes"
+        "build:Build System"
+        "ci:CI Changes"
+        "chore:Chores"
+        "revert:Reverts"
+    )
+
+    # Limpar variáveis de saída
+    local changelog_sections=()
+
+    # Iterar sobre os tipos de commits
+    for type_mapping in "${commit_types[@]}"; do
+        IFS=':' read -r commit_prefix section_name <<< "$type_mapping"
+        
+        # Buscar commits deste tipo
+        local commits=$(git log "$last_version_commit"..HEAD --pretty=format:"%s" | grep "^$commit_prefix" || true)
+        
+        # Se houver commits, adicionar à seção
+        if [ ! -z "$commits" ]; then
+            local section="### $section_name\n"
+            while IFS= read -r commit; do
+                section+="- $commit\n"
+            done <<< "$commits"
+            section+="\n"
+            changelog_sections+=("$section")
+        fi
+    done
+
+    # Buscar outros commits que não se encaixam nos tipos acima
+    local other_commits=$(git log "$last_version_commit"..HEAD --pretty=format:"%s" | grep -vE "^($(IFS='|'; echo "${commit_types[@]/%:*/}"))" || true)
+    if [ ! -z "$other_commits" ]; then
+        local other_section="### Other Changes\n"
+        while IFS= read -r commit; do
+            other_section+="- $commit\n"
+        done <<< "$other_commits"
+        other_section+="\n"
+        changelog_sections+=("$other_section")
+    fi
+
+    # Gerar changelog final
     echo ""  # Add blank line before version header
     echo "## [$version] - $(date +%Y-%m-%d)"
-    echo
+    echo ""
 
-    if [ ! -z "$features" ]; then
-        echo "### Added"
-        echo "$features" | while read -r line; do
-            echo "- $line"
-        done
-        echo
-    fi
-
-    if [ ! -z "$fixes" ]; then
-        echo "### Fixed"
-        echo "$fixes" | while read -r line; do
-            echo "- $line"
-        done
-        echo
-    fi
-
-    if [ ! -z "$docs" ]; then
-        echo "### Documentation"
-        echo "$docs" | while read -r line; do
-            echo "- $line"
-        done
-        echo
-    fi
-
-    if [ ! -z "$others" ]; then
-        echo "### Other Changes"
-        echo "$others" | while read -r line; do
-            echo "- $line"
-        done
-        echo
-    fi
+    # Imprimir seções
+    for section in "${changelog_sections[@]}"; do
+        echo -e "$section"
+    done
 }
 
 # Function to prepare version in development
@@ -153,19 +175,27 @@ prepare_version() {
     center_text "New Version: $NEW_VERSION"
     echo "$BOX_BOTTOM"
 
-    # Update VERSION file and package.json
-    execute_cmd "echo $NEW_VERSION > VERSION"
-    execute_cmd "pnpm version $NEW_VERSION --no-git-tag-version"
-    
-    # Update changelog with new entry at the beginning
-    execute_cmd "printf '%s\n\n%s' \"\$(generate_changelog \"$NEW_VERSION\")\" \"\$(cat CHANGELOG.md)\" > CHANGELOG.md"
-    
-    # Stage changes
-    execute_cmd "git add VERSION package.json CHANGELOG.md"
-    execute_cmd "git commit -m 'chore: bump version $NEW_VERSION'"
-    
-    echo -e "${GREEN}Version bump prepared successfully!${NC}"
-    echo -e "${YELLOW}Review the changes and push manually when ready.${NC}"
+    # Encontrar o commit do último bump de versão
+    LAST_VERSION_COMMIT=$(git log --grep="^chore: bump version" -n 1 --pretty=format:"%H")
+
+    if [ "$DRY_RUN" = true ]; then
+        echo -e "${YELLOW}Dry Run Changelog:${NC}"
+        generate_changelog "$NEW_VERSION" "$LAST_VERSION_COMMIT"
+    else
+        # Update VERSION file and package.json
+        execute_cmd "echo $NEW_VERSION > VERSION"
+        execute_cmd "pnpm version $NEW_VERSION --no-git-tag-version"
+        
+        # Update changelog with new entry at the beginning, passando o commit de referência
+        execute_cmd "printf '%s\n\n%s' \"\$(generate_changelog \"$NEW_VERSION\" \"$LAST_VERSION_COMMIT\")\" \"\$(cat CHANGELOG.md)\" > CHANGELOG.md"
+        
+        # Stage changes
+        execute_cmd "git add VERSION package.json CHANGELOG.md"
+        execute_cmd "git commit -m 'chore: bump version $NEW_VERSION'"
+        
+        echo -e "${GREEN}Version bump prepared successfully!${NC}"
+        echo -e "${YELLOW}Review the changes and push manually when ready.${NC}"
+    fi
 }
 
 # Function to create tag in main
