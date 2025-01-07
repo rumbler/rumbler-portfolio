@@ -42,7 +42,7 @@ jobs:
         if: github.event.inputs.version == ''
         id: version
         run: |
-          VERSION="${{ github.ref_name }}
+          VERSION="${{ github.ref_name }}"
           ENVIRONMENT="production"
 
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
