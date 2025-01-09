@@ -1,4 +1,10 @@
 
+## [1.4.6] - 2025-01-09
+
+### Refactoring
+- refactor(segurança): corrigir permissões do Dockerfile (#75)
+
+
 ## [1.4.5] - 2025-01-07
 
 ### Added
