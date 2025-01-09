@@ -1,7 +1,10 @@
-# Portfolio Project 
+# Portfolio Project
 
 [![CI](https://github.com/rumbler/rumbler-portfolio/actions/workflows/ci.yml/badge.svg)](https://github.com/rumbler/rumbler-portfolio/actions/workflows/ci.yml)
+
 [![Production](https://github.com/rumbler/rumbler-portfolio/actions/workflows/production.yml/badge.svg)](https://github.com/rumbler/rumbler-portfolio/actions/workflows/production.yml)
+
+[![Quality Gate Status](https://sonar.rumblersoppa.com.br/api/project_badges/measure?project=rumbler_rumbler-portfolio_e61e381c-3f60-4e1f-a0bc-809cfb702da8&metric=alert_status&token=sqb_aad0420c22708ccfb1b18334bc1d729c7e5508c0)](https://sonar.rumblersoppa.com.br/dashboard?id=rumbler_rumbler-portfolio_e61e381c-3f60-4e1f-a0bc-809cfb702da8)
 
 > A modern and responsive portfolio built with React and TypeScript.
 
