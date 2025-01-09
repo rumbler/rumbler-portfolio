@@ -75,6 +75,42 @@ jobs:
         timeout-minutes: 5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          exit-code: '0'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'LOW,MEDIUM,HIGH,CRITICAL'
+          scanners: 'vuln'
+          output: 'trivy-dependency-report.sarif'
+
+      - name: Run Trivy to Scan for Misconfigurations
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          exit-code: '0'
+          ignore-unfixed: true
+          scanners: 'misconfig'
+          output: 'trivy-misconfig-report.sarif'
+
+      - name: Upload Trivy Dependency Report to GitHub
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: trivy-dependency-report.sarif
+          category: trivy-dependency-scan
+
+      - name: Upload Trivy Misconfigurations Report to GitHub
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: trivy-misconfig-report.sarif
+          category: trivy-misconfig-scan
 
       - name: Zip build
         run: |
