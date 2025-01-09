@@ -20,8 +20,11 @@ COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --prod --frozen-lockfile
 
 # Copiar os arquivos necessários
-COPY --chown=appuser:appgroup build ./build
-COPY --chown=appuser:appgroup src/server.js ./
+COPY build ./build
+COPY src/server.js .
+
+# Definir permissões corretas
+RUN chmod 555 ./build ./server.js
 
 # Alternar para usuário não-root
 USER appuser
