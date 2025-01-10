@@ -8,8 +8,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // set up rate limiter: maximum of sixteen requests per minute
-var RateLimit = require('express-rate-limit');
-var limiter = RateLimit({
+const RateLimit = require('express-rate-limit');
+const limiter = RateLimit({
   windowMs: 1 * 60 * 1000, // 1 minuto
   max: 16, // 16 requisições por minuto
   message: 'Limite de requisições excedido. Tente novamente em um minuto.'
