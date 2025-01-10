@@ -105,13 +105,13 @@ jobs:
           output: 'trivy-misconfig-report.sarif'
 
       - name: Upload Trivy Dependency Report to GitHub
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy-dependency-report.sarif
           category: trivy-dependency-scan
 
       - name: Upload Trivy Misconfigurations Report to GitHub
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy-misconfig-report.sarif
           category: trivy-misconfig-scan
