@@ -90,7 +90,7 @@ jobs:
           output: 'trivy-dependency-report.sarif'
 
       - name: Run Trivy to Scan for Misconfigurations
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@18f2510ee396bbf400402947b394f2dd8c87dbb0
         with:
           scan-type: 'fs'
           scan-ref: '.'
