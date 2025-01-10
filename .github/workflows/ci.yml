@@ -97,6 +97,7 @@ jobs:
           format: 'sarif'
           exit-code: '0'
           ignore-unfixed: true
+          skip-dirs: 'node_modules'
           scanners: 'misconfig'
           output: 'trivy-misconfig-report.sarif'
 
