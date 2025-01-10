@@ -7,6 +7,17 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// set up rate limiter: maximum of sixteen requests per minute
+var RateLimit = require('express-rate-limit');
+var limiter = RateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minuto
+  max: 16, // 16 requisições por minuto
+  message: 'Limite de requisições excedido. Tente novamente em um minuto.'
+});
+
+// apply rate limiter to all requests
+app.use(limiter);
+
 // Configurações básicas de segurança
 app.use(helmet());
 app.use(cors({
