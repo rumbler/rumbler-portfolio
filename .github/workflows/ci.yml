@@ -1,7 +1,11 @@
 name: Continuous Integration
 permissions:
+  packages: write
   contents: read
-  pull-requests: write
+  actions: read
+  checks: write  
+  deployments: write
+  security-events: write
 
 on:
   push:
@@ -137,3 +141,27 @@ jobs:
           curl -u "${NEXUS_USER}:$NEXUS_PASS" \
             --upload-file build.zip \
             "${NEXUS_URL}/repository/${NEXUS_REPO}/${REPOSITORY_NAME}/${NEXUS_ENV}/${NEXUS_VERSION}.zip"
+
+      - name: Trigger Development Deployment
+        if: success() && github.ref == 'refs/heads/development'
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          event-type: deploy-development
+          client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
+
+      - name: Trigger Release Deployment
+        if: success() && github.ref == 'refs/heads/main'
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          event-type: deploy-release
+          client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
+
+      - name: Trigger Production Deployment
+        if: success() && startsWith(github.ref, 'refs/tags/v')
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          event-type: deploy-production
+          client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
