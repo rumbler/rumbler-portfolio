@@ -1,4 +1,12 @@
-name: Production CD
+name: Continuous Deployment to Production Environment
+
+permissions:
+  packages: write
+  contents: read
+  actions: read
+  checks: write
+  deployments: write
+  security-events: write
 
 on:
   workflow_dispatch:
@@ -10,13 +18,8 @@ on:
   push:
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+'
-
-permissions:
-  packages: write
-  contents: read
-  actions: read
-  checks: write
-  deployments: write
+  repository_dispatch:
+    types: [deploy-production]
 
 jobs:
   deploy-production:

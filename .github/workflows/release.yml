@@ -1,16 +1,19 @@
 name: Continuous Deployment to Release Environment
 
-on:
-  push:
-    branches:
-      - "main"
-
 permissions:
   packages: write
   contents: read
   actions: read
   checks: write
   deployments: write
+  security-events: write
+
+on:
+  push:
+    branches:
+      - "main"
+  repository_dispatch:
+    types: [deploy-release]
 
 jobs:
   deploy-release:

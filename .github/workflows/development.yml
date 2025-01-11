@@ -1,16 +1,19 @@
 name: Continuous Deployment to Development Environment
 
-on:
-  push:
-    branches:
-      - "development"
-
 permissions:
   packages: write
   contents: read
   actions: read
   checks: write  
   deployments: write
+  security-events: write
+
+on:
+  push:
+    branches:
+      - "development"
+  repository_dispatch:
+    types: [deploy-development]
 
 jobs:
   deploy-development:
