@@ -72,7 +72,7 @@ app.use((req, res, next) => {
 // Endpoint para relatórios CSP
 app.post('/csp-report', express.json({ type: 'application/csp-report' }), (req, res) => {
   try {
-    const sanitizedInput = req.body.cdp.request.info.source.map((src) => src);
+    const sanitizedInput = req.body.cdp.request.info.source.map((src) => src.replace(/\n|\r/g, ""));
     logger.info(`CSP Violation: ${sanitizedInput}`);
     res.status(200).send('CSP Report Received');
   } catch (error) {
