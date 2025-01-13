@@ -3,6 +3,19 @@ const crypto = require('crypto');
 const path = require('path');
 const helmet = require('helmet');
 const cors = require('cors');
+const winston = require('winston');
+
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.json()
+  ),
+  transports: [
+    new winston.transports.Console()
+  ]
+});
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -11,7 +24,7 @@ const PORT = process.env.PORT || 3000;
 const RateLimit = require('express-rate-limit');
 const limiter = RateLimit({
   windowMs: 1 * 60 * 1000, // 1 minuto
-  max: 16, // 16 requisições por minuto
+  max: 60, // 60 requisições por minuto
   message: 'Limite de requisições excedido. Tente novamente em um minuto.'
 });
 
@@ -59,11 +72,12 @@ app.use((req, res, next) => {
 // Endpoint para relatórios CSP
 app.post('/csp-report', express.json({ type: 'application/csp-report' }), (req, res) => {
   try {
-    console.log('CSP Violation:', req.body);
-    res.status(204).end();
+    const sanitizedInput = req.body.cdp.request.info.source.map((src) => src);
+    logger.info(`CSP Violation: ${sanitizedInput}`);
+    res.status(200).send('CSP Report Received');
   } catch (error) {
-    console.error('Error processing CSP report:', error);
-    res.status(500).end();
+    logger.error(error);
+    res.status(500).send('Error Processing CSP Report');
   }
 });
 
@@ -79,35 +93,35 @@ app.get('*', (req, res) => {
     const indexPath = path.join('/app/build/index.html');
     res.sendFile(indexPath, (err) => {
       if (err) {
-        console.error('Error sending index.html:', err);
+        logger.error('Error sending index.html:', err);
         res.status(500).send('Error loading page');
       }
     });
   } catch (error) {
-    console.error('Error serving index.html:', error);
+    logger.error('Error serving index.html:', error);
     res.status(500).send('Internal Server Error');
   }
 });
 
 // Middleware de tratamento de erros
 app.use((err, req, res, next) => {
-  console.error('Unhandled error:', err);
+  logger.error('Unhandled error:', err);
   res.status(500).send('Internal Server Error');
 });
 
 // Iniciar servidor com tratamento de erro
 const server = app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  logger.info(`Server running on port ${PORT}`);
 }).on('error', (error) => {
-  console.error('Error starting server:', error);
+  logger.error('Error starting server:', error);
   process.exit(1);
 });
 
 // Tratamento de sinais de encerramento
 process.on('SIGTERM', () => {
-  console.log('SIGTERM received. Shutting down gracefully...');
+  console.info('SIGTERM received. Shutting down gracefully...');
   server.close(() => {
-    console.log('Server closed');
+    console.info('Server closed');
     process.exit(0);
   });
 });
