@@ -1,7 +1,9 @@
-version: '3.8'
-
 services:
   portfolio-development:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
     image: ${REGISTRY_URL}/rumbler-portfolio:${DEV_IMAGE_TAG:-development}
     container_name: rumbler-portfolio-development-${DEV_IMAGE_TAG:-dev}
     restart: unless-stopped
@@ -21,6 +23,10 @@ services:
       - portfolio-net
 
   portfolio-release:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: release
     image: ${REGISTRY_URL}/rumbler-portfolio:${RELEASE_IMAGE_TAG:-release}
     container_name: rumbler-portfolio-release-${RELEASE_IMAGE_TAG:-release}
     restart: unless-stopped
@@ -40,6 +46,10 @@ services:
       - portfolio-net
 
   portfolio-production:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
     image: ${REGISTRY_URL}/rumbler-portfolio:${PROD_IMAGE_TAG:-latest}
     container_name: rumbler-portfolio-production-${PROD_IMAGE_TAG:-latest}
     restart: unless-stopped

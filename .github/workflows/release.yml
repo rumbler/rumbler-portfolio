@@ -1,21 +1,24 @@
 name: Continuous Deployment to Release Environment
 
-on:
-  push:
-    branches:
-      - "main"
-
 permissions:
   packages: write
   contents: read
   actions: read
   checks: write
   deployments: write
+  security-events: write
+
+on:
+  workflow_run:
+    workflows:
+      - "Continuous Integration"
+    types:
+      - completed
 
 jobs:
   deploy-release:
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main' }}
     name: Deploy to Release
-    if: github.ref == 'refs/heads/main'
     runs-on: self-hosted
     environment: release
     env:

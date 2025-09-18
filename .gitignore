@@ -28,5 +28,8 @@ docker-compose.override.yml
 .env.test.local
 .env.production.local
 
-# # Rules
-.windsurfrules
+# # VScode 
+.vscode/
+
+# Continue
+.continuerules

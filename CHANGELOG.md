@@ -1,4 +1,27 @@
 
+## [2.0.0] - 2025-09-18
+
+### Added
+- feat: implementa multi-stage Docker build e corrige incompatibilidades
+- feat(ci): Adiciona scans de segurança com Trivy no workflow de CI (#77)
+
+
+### Fixed
+- fix: Single-character alternations in regular expressions should be r… (#102)
+- fix: Fix code scanning alert - Issue #97 (#100)
+- fix: Fix code scanning alert - Issue #96 (#99)
+- fix: Fix code scanning alert - Issue #95 (#98)
+- fix: Fix code scanning alert - Issue #83 (#84)
+- fix: Fix code scanning alert - Issue #81 (#82)
+- fix: Fix code scanning alert - Issue #79 (#80)
+- fix: conflito merge
+- fix: conflito merge
+
+
+### Chores
+- chore(release): Merge development para main (#78)
+
+
 ## [1.4.6] - 2025-01-09
 
 ### Refactoring
