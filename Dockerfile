@@ -38,9 +38,14 @@ RUN pnpm build
 # ===========================================
 FROM node:24-alpine AS production
 
+<<<<<<< HEAD
 # Install pnpm, curl and configure user system
 RUN apk add --no-cache curl && \
     wget -qO /bin/pnpm "https://github.com/pnpm/pnpm/releases/latest/download/pnpm-linuxstatic-x64" && \
+=======
+# Install pnpm and configure user system
+RUN wget -qO /bin/pnpm "https://github.com/pnpm/pnpm/releases/latest/download/pnpm-linuxstatic-x64" && \
+>>>>>>> origin/development
     chmod +x /bin/pnpm && \
     addgroup -S -g 1001 appgroup && \
     adduser -S -u 1001 -G appgroup appuser
