@@ -38,8 +38,9 @@ RUN pnpm build
 # ===========================================
 FROM node:24-alpine AS production
 
-# Install pnpm and configure user system
-RUN wget -qO /bin/pnpm "https://github.com/pnpm/pnpm/releases/latest/download/pnpm-linuxstatic-x64" && \
+# Install pnpm, curl and configure user system
+RUN apk add --no-cache curl && \
+    wget -qO /bin/pnpm "https://github.com/pnpm/pnpm/releases/latest/download/pnpm-linuxstatic-x64" && \
     chmod +x /bin/pnpm && \
     addgroup -S -g 1001 appgroup && \
     adduser -S -u 1001 -G appgroup appuser
@@ -80,6 +81,10 @@ ENV PRODUCTION_DOMAIN=""
 
 # Expose port
 EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:3000/ || exit 1
 
 # Start command
 CMD ["node", "server.js"]
