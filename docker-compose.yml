@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      target: development
+      target: production
     image: ${REGISTRY_URL}/rumbler-portfolio:${DEV_IMAGE_TAG:-development}
     container_name: rumbler-portfolio-development-${DEV_IMAGE_TAG:-dev}
     restart: unless-stopped
@@ -26,7 +26,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+<<<<<<< HEAD
+      target: production
+=======
       target: release
+>>>>>>> origin/development
     image: ${REGISTRY_URL}/rumbler-portfolio:${RELEASE_IMAGE_TAG:-release}
     container_name: rumbler-portfolio-release-${RELEASE_IMAGE_TAG:-release}
     restart: unless-stopped
