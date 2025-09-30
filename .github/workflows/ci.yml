@@ -24,6 +24,12 @@ on:
 jobs:
   build-and-upload:
     runs-on: self-hosted
+    env:
+      DOCKER_REGISTRY_URL: ${{ secrets.DOCKER_REGISTRY_URL }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      REPOSITORY_NAME: ${{ secrets.REPOSITORY_NAME }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
@@ -124,29 +130,40 @@ jobs:
           category: trivy-misconfig-scan
 
       - name: Build Docker image
+        # Condição de execução atualizada para refletir sua intenção
         if: |
-          github.event_name == 'push' && 
-          (steps.version.outputs.environment == 'development' || 
-           steps.version.outputs.environment == 'release' || 
-           steps.version.outputs.environment == 'production')
-        env:
-          DOCKER_REGISTRY_URL: ${{ secrets.DOCKER_REGISTRY_URL }}
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-          REPOSITORY_NAME: ${{ secrets.REPOSITORY_NAME }}
+          github.event_name == 'push' && (
+            github.ref == 'refs/heads/development' || 
+            github.ref == 'refs/heads/main' || 
+            startsWith(github.ref, 'refs/heads/hotfix/') || 
+            startsWith(github.ref, 'refs/heads/release/') || 
+            startsWith(github.ref, 'refs/tags/v')
+          )
         run: |
           docker build -t $DOCKER_REGISTRY_URL/${REPOSITORY_NAME}:${{ steps.version.outputs.version }} .
 
-      - name: Push Docker image to Harbor
+      - name: Login to Docker Registry
+        # Condição de execução atualizada
         if: |
-          github.event_name == 'push' && 
-          (steps.version.outputs.environment == 'development' || 
-           steps.version.outputs.environment == 'release' || 
-           steps.version.outputs.environment == 'production')
-        env:
-          DOCKER_REGISTRY_URL: ${{ secrets.DOCKER_REGISTRY_URL }}
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-          REPOSITORY_NAME: ${{ secrets.REPOSITORY_NAME }}
+          github.event_name == 'push' && (
+            github.ref == 'refs/heads/development' || 
+            github.ref == 'refs/heads/main' || 
+            startsWith(github.ref, 'refs/heads/hotfix/') || 
+            startsWith(github.ref, 'refs/heads/release/') || 
+            startsWith(github.ref, 'refs/tags/v')
+          )
+        run: |
+          echo $DOCKER_PASSWORD | docker login $DOCKER_REGISTRY_URL -u $DOCKER_USERNAME --password-stdin
+
+      - name: Push Docker image to Harbor
+        # Condição de execução atualizada
+        if: |
+          github.event_name == 'push' && (
+            github.ref == 'refs/heads/development' || 
+            github.ref == 'refs/heads/main' || 
+            startsWith(github.ref, 'refs/heads/hotfix/') || 
+            startsWith(github.ref, 'refs/heads/release/') || 
+            startsWith(github.ref, 'refs/tags/v')
+          )
         run: |
           docker push $DOCKER_REGISTRY_URL/${REPOSITORY_NAME}:${{ steps.version.outputs.version }}
