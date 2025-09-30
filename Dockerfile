@@ -54,7 +54,7 @@ COPY src/server.js .
 RUN chmod 555 ./build ./server.js
 
 # Switch to non-root user
-USER appuser
+USER 1001:1001
 
 # Set production environment variables
 ENV NODE_ENV=production
