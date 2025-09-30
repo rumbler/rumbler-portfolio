@@ -4,7 +4,7 @@
 
 [![Production](https://github.com/rumbler/rumbler-portfolio/actions/workflows/production.yml/badge.svg)](https://github.com/rumbler/rumbler-portfolio/actions/workflows/production.yml)
 
-[![Quality Gate Status](https://sonar.rumblersoppa.com.br/api/project_badges/measure?project=rumbler_rumbler-portfolio_e61e381c-3f60-4e1f-a0bc-809cfb702da8&metric=alert_status&token=sqb_aad0420c22708ccfb1b18334bc1d729c7e5508c0)](https://sonar.rumblersoppa.com.br/dashboard?id=rumbler_rumbler-portfolio_e61e381c-3f60-4e1f-a0bc-809cfb702da8)
+[![Quality Gate Status](https://sonar.rumblersoppa.com.br/api/project_badges/measure?project=rumbler_rumbler-portfolio_63b7d65d-815d-4915-8c4f-4c90d714ff7b&metric=alert_status&token=sqb_ca8ead10e6fee94e6a1aeef6340bacf61b85f72c)](https://sonar.rumblersoppa.com.br/dashboard?id=rumbler_rumbler-portfolio_63b7d65d-815d-4915-8c4f-4c90d714ff7b)
 
 > A modern and responsive portfolio built with React and TypeScript.
 
