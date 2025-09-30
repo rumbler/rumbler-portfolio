@@ -38,39 +38,16 @@ RUN pnpm build
 # ===========================================
 FROM node:24-alpine AS production
 
-<<<<<<< HEAD
-# Install pnpm, curl and configure user system
-RUN apk add --no-cache curl && \
-    wget -qO /bin/pnpm "https://github.com/pnpm/pnpm/releases/latest/download/pnpm-linuxstatic-x64" && \
-=======
-# Install pnpm and configure user system
-RUN wget -qO /bin/pnpm "https://github.com/pnpm/pnpm/releases/latest/download/pnpm-linuxstatic-x64" && \
->>>>>>> origin/development
-    chmod +x /bin/pnpm && \
-    addgroup -S -g 1001 appgroup && \
+RUN addgroup -S -g 1001 appgroup && \
     adduser -S -u 1001 -G appgroup appuser
 
 # Set working directory
 WORKDIR /app
 
-# Configure pnpm environment
-ENV PNPM_HOME="/usr/local/share/pnpm"
-ENV PATH="${PNPM_HOME}:${PATH}"
+# Copie apenas o que é necessário do STAGE 1
 
-# Setup pnpm directories and permissions
-RUN mkdir -p ${PNPM_HOME} && \
-    chown -R appuser:appgroup ${PNPM_HOME} /usr/local/bin
-
-# Copy package files
-COPY package.json pnpm-lock.yaml ./
-
-# Install only production dependencies
-RUN pnpm install --prod --frozen-lockfile
-
-# Copy built files from builder stage
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/build ./build
-
-# Copy server file
 COPY src/server.js .
 
 # Set file permissions

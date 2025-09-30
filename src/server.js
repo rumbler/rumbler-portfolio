@@ -40,13 +40,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Middleware para gerar nonce
-app.use((req, res, next) => {
+app.use((_req, res, next) => {
   res.locals.nonce = crypto.randomBytes(16).toString('base64');
   next();
 });
 
 // Middleware CSP
-app.use((req, res, next) => {
+app.use((_req, res, next) => {
   const nonce = res.locals.nonce;
   res.setHeader(
     'Content-Security-Policy',
@@ -88,7 +88,7 @@ app.use(express.static(path.join('/app/build'), {
 }));
 
 // Rota principal
-app.get('*', (req, res) => {
+app.get('*', (_req, res) => {
   try {
     const indexPath = path.join('/app/build/index.html');
     res.sendFile(indexPath, (err) => {
@@ -104,7 +104,7 @@ app.get('*', (req, res) => {
 });
 
 // Middleware de tratamento de erros
-app.use((err, req, res, next) => {
+app.use((err, _req, res, _next) => {
   logger.error('Unhandled error:', err);
   res.status(500).send('Internal Server Error');
 });
